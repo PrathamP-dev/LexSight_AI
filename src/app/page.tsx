@@ -54,7 +54,7 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <main className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4">
+        <main className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 pt-20 pb-10 md:pt-0 md:pb-0">
            <div className="z-10 flex flex-col items-center text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -96,3 +96,4 @@ export default function LandingPage() {
     </>
   );
 }
+
