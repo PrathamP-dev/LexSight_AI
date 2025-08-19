@@ -204,15 +204,6 @@ body {
     animation-play-state: running;
 }
 
-@keyframes spin {
-  from {
-    --border-angle: 0deg;
-  }
-  to {
-    --border-angle: 360deg;
-  }
-}
-
 .star-border-card .star-border-content {
   position: relative;
   z-index: 1;

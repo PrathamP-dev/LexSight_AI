@@ -4,7 +4,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LegalMindLogo } from '@/components/icons';
 import { motion } from 'framer-motion';
 import { DarkVeil } from '@/components/dark-veil';
 import { ShieldCheck, FileText, CheckCircle, Scale, Users, Bot, IndianRupee, Languages, Wand, CalendarClock, ArrowRight, BrainCircuit, Search, FileUp, Check } from 'lucide-react';
@@ -79,7 +78,7 @@ export default function LandingPage() {
         <header className="absolute top-0 left-0 right-0 z-10 p-4">
           <div className="container mx-auto flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <LegalMindLogo className="size-8 text-primary" />
+              <Scale className="size-8 text-primary" />
               <h1 className="font-headline text-2xl font-bold">LegalMind AI</h1>
             </Link>
             <Link href="/login">
