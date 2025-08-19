@@ -106,7 +106,7 @@ export function Dashboard() {
       };
       handleNewDocument(newDoc);
       sessionStorage.removeItem('pastedText');
-      return; // Early return to avoid race condition with file upload
+      return; 
     }
 
     const uploadedFileRaw = sessionStorage.getItem('uploadedFile');
@@ -116,7 +116,7 @@ export function Dashboard() {
         const newDoc: Document = {
           id: `doc-${Date.now()}`,
           name: uploadedFile.name,
-          type: 'contract', // Simple default, could be improved
+          type: 'contract', 
           content: uploadedFile.content,
           createdAt: new Date().toISOString().split('T')[0],
         };
@@ -233,7 +233,6 @@ export function Dashboard() {
       };
       reader.readAsText(file);
     }
-    // Reset file input to allow uploading the same file again
     if (fileInputRef.current) {
         fileInputRef.current.value = '';
     }
@@ -405,7 +404,12 @@ export function Dashboard() {
                                   {riskAnalysis && !isRiskPending && (
                                       <Card className="flex-1">
                                           <CardHeader>
-                                              <CardTitle className="font-headline flex items-center gap-2"><Shield className="text-destructive"/>Risk Analysis Report</CardTitle>
+                                              <CardTitle className="font-headline">
+                                                <div className="flex items-center gap-2">
+                                                  <Shield className="text-destructive"/>
+                                                  <span>Risk Analysis Report</span>
+                                                </div>
+                                              </CardTitle>
                                           </CardHeader>
                                           <CardContent>
                                               <ScrollArea className="h-[400px] md:h-[calc(100vh-22rem)]">
