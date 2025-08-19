@@ -75,7 +75,7 @@ export function Dashboard() {
   const [isRiskPending, startRiskTransition] = useTransition();
   
   const [documents, setDocuments] = useState<Document[]>(initialDocuments);
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(documents.length > 0 ? documents[0] : null);
   const [selectedText, setSelectedText] = useState('');
   const [summary, setSummary] = useState('');
   const [riskAnalysis, setRiskAnalysis] = useState('');
@@ -83,6 +83,16 @@ export function Dashboard() {
   const textContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleNewDocument = useCallback((doc: Document) => {
+    setDocuments(docs => [doc, ...docs]);
+    setSelectedDoc(doc);
+    // Reset analysis states
+    setSelectedText('');
+    setSummary('');
+    setRiskAnalysis('');
+    setActiveTab('summary');
+  }, []);
 
   useEffect(() => {
     const pastedText = sessionStorage.getItem('pastedText');
@@ -94,31 +104,31 @@ export function Dashboard() {
         content: pastedText,
         createdAt: new Date().toISOString().split('T')[0],
       };
-      setDocuments(docs => [newDoc, ...docs]);
-      setSelectedDoc(newDoc);
+      handleNewDocument(newDoc);
       sessionStorage.removeItem('pastedText');
+      return; // Early return to avoid race condition with file upload
     }
 
     const uploadedFileRaw = sessionStorage.getItem('uploadedFile');
     if (uploadedFileRaw) {
-      const uploadedFile = JSON.parse(uploadedFileRaw);
-      const newDoc: Document = {
-        id: `doc-${Date.now()}`,
-        name: uploadedFile.name,
-        type: 'contract', // Simple default, could be improved
-        content: uploadedFile.content,
-        createdAt: new Date().toISOString().split('T')[0],
-      };
-      setDocuments(docs => [newDoc, ...docs]);
-      setSelectedDoc(newDoc);
-      sessionStorage.removeItem('uploadedFile');
+      try {
+        const uploadedFile = JSON.parse(uploadedFileRaw);
+        const newDoc: Document = {
+          id: `doc-${Date.now()}`,
+          name: uploadedFile.name,
+          type: 'contract', // Simple default, could be improved
+          content: uploadedFile.content,
+          createdAt: new Date().toISOString().split('T')[0],
+        };
+        handleNewDocument(newDoc);
+      } catch (e) {
+        console.error("Failed to parse uploaded file from session storage", e);
+      } finally {
+        sessionStorage.removeItem('uploadedFile');
+      }
     }
+  }, [handleNewDocument]);
 
-    if (!pastedText && !uploadedFileRaw && documents.length > 0) {
-        setSelectedDoc(documents[0]);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleTextSelection = useCallback(() => {
     const text = window.getSelection()?.toString().trim() ?? '';
@@ -187,7 +197,8 @@ export function Dashboard() {
     setDocuments(docs => {
         const newDocs = docs.filter(d => d.id !== docId);
         if (selectedDoc?.id === docId) {
-            setSelectedDoc(newDocs.length > 0 ? newDocs[0] : null);
+            const newSelectedDoc = newDocs.length > 0 ? newDocs[0] : null;
+            setSelectedDoc(newSelectedDoc);
         }
         return newDocs;
     });
@@ -214,14 +225,17 @@ export function Dashboard() {
           content: text,
           createdAt: new Date().toISOString().split('T')[0],
         };
-        setDocuments(docs => [newDoc, ...docs]);
-        setSelectedDoc(newDoc);
+        handleNewDocument(newDoc);
         toast({
             title: "Document Uploaded",
             description: `"${file.name}" has been successfully added.`,
         });
       };
       reader.readAsText(file);
+    }
+    // Reset file input to allow uploading the same file again
+    if (fileInputRef.current) {
+        fileInputRef.current.value = '';
     }
   };
 
