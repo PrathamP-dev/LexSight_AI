@@ -85,9 +85,9 @@ export function Dashboard() {
 
   const handleTextSelection = useCallback(() => {
     const text = window.getSelection()?.toString().trim() ?? '';
-    if (text && text.length > 20) { // Require a minimum length
+    if (text && text.length > 20) { 
       setSelectedText(text);
-      setSummary(''); // Clear previous summary
+      setSummary(''); 
       setActiveTab('summary');
     }
   }, []);
@@ -124,7 +124,7 @@ export function Dashboard() {
 
   const onAnalyzeRisk = () => {
     if (!selectedDoc) return;
-    setRiskAnalysis(''); // Clear previous analysis
+    setRiskAnalysis(''); 
     setActiveTab('risk');
     startRiskTransition(async () => {
       const result = await handleAnalyzeRisk(selectedDoc.content);
@@ -160,199 +160,202 @@ export function Dashboard() {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen">
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center gap-2">
-              <LegalMindLogo className="size-7 text-primary" />
-              <h2 className="font-headline text-2xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
-                LegalMind
-              </h2>
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              {documents.map((doc) => (
-                <SidebarMenuItem key={doc.id}>
-                  <SidebarMenuButton
-                    onClick={() => selectDocument(doc)}
-                    isActive={selectedDoc?.id === doc.id}
-                    tooltip={doc.name}
-                  >
-                    {documentIcons[doc.type]}
-                    <span>{doc.name}</span>
-                  </SidebarMenuButton>
-                   <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                          <SidebarMenuAction showOnHover>
-                              <Trash2 />
-                          </SidebarMenuAction>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                          <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete the document "{doc.name}".
-                              </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => deleteDocument(doc.id)}>
-                                  Delete
-                              </AlertDialogAction>
-                          </AlertDialogFooter>
-                      </AlertDialogContent>
-                  </AlertDialog>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter>
-            <Button variant="default" className="w-full">
-              <Upload className="mr-2 size-4" />
-              <span className="group-data-[collapsible=icon]:hidden">Upload Document</span>
-            </Button>
-          </SidebarFooter>
-        </Sidebar>
+    <>
+      <div className="dark-veil"></div>
+      <SidebarProvider>
+        <div className="flex min-h-screen relative z-10">
+          <Sidebar>
+            <SidebarHeader>
+              <div className="flex items-center gap-2">
+                <LegalMindLogo className="size-7 text-primary" />
+                <h2 className="font-headline text-2xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
+                  LegalMind
+                </h2>
+              </div>
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarMenu>
+                {documents.map((doc) => (
+                  <SidebarMenuItem key={doc.id}>
+                    <SidebarMenuButton
+                      onClick={() => selectDocument(doc)}
+                      isActive={selectedDoc?.id === doc.id}
+                      tooltip={doc.name}
+                    >
+                      {documentIcons[doc.type]}
+                      <span>{doc.name}</span>
+                    </SidebarMenuButton>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <SidebarMenuAction showOnHover>
+                                <Trash2 />
+                            </SidebarMenuAction>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the document "{doc.name}".
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteDocument(doc.id)}>
+                                    Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarContent>
+            <SidebarFooter>
+              <Button variant="default" className="w-full">
+                <Upload className="mr-2 size-4" />
+                <span className="group-data-[collapsible=icon]:hidden">Upload Document</span>
+              </Button>
+            </SidebarFooter>
+          </Sidebar>
 
-        <SidebarInset className="flex flex-col">
-          {selectedDoc ? (
-            <div className="grid md:grid-cols-2 flex-1 gap-4 p-4 md:p-6">
-              <div className="flex flex-col h-full max-h-[calc(100vh-3rem)]">
-                <header className="flex items-center justify-between pb-4">
-                  <div className="flex-1">
-                    <h1 className="font-headline text-2xl font-bold">{selectedDoc.name}</h1>
-                    <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {selectedDoc.createdAt}</p>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <ThemeToggle />
-                    <SidebarTrigger className="md:hidden" />
-                  </div>
-                </header>
-                <Card className="flex-1 flex flex-col shadow-md">
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="text-lg font-headline">Document Text</CardTitle>
-                    {selectedDoc.type === 'contract' && (
-                        <Button size="sm" onClick={onAnalyzeRisk} disabled={isRiskPending}>
-                            {isRiskPending ? (
-                                <Loader2 className="mr-2 size-4 animate-spin" />
-                            ) : (
-                                <Shield className="mr-2 size-4" />
-                            )}
-                            Analyze for Risks
-                        </Button>
-                    )}
-                  </CardHeader>
-                  <Separator />
-                  <CardContent className="p-0 flex-1">
-                    <ScrollArea className="h-full">
-                      <div ref={textContainerRef} className="p-6 text-sm leading-relaxed whitespace-pre-wrap font-body">
-                        {selectedDoc.content}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              </div>
+          <SidebarInset className="flex flex-col bg-transparent">
+            {selectedDoc ? (
+              <div className="grid md:grid-cols-2 flex-1 gap-4 p-4 md:p-6">
+                <div className="flex flex-col h-full max-h-[calc(100vh-3rem)]">
+                  <header className="flex items-center justify-between pb-4">
+                    <div className="flex-1">
+                      <h1 className="font-headline text-2xl font-bold">{selectedDoc.name}</h1>
+                      <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {selectedDoc.createdAt}</p>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <ThemeToggle />
+                      <SidebarTrigger className="md:hidden" />
+                    </div>
+                  </header>
+                  <Card className="flex-1 flex flex-col shadow-xl bg-card/80 backdrop-blur-sm border-primary/20">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="text-lg font-headline">Document Text</CardTitle>
+                      {selectedDoc.type === 'contract' && (
+                          <Button size="sm" onClick={onAnalyzeRisk} disabled={isRiskPending}>
+                              {isRiskPending ? (
+                                  <Loader2 className="mr-2 size-4 animate-spin" />
+                              ) : (
+                                  <Shield className="mr-2 size-4" />
+                              )}
+                              Analyze for Risks
+                          </Button>
+                      )}
+                    </CardHeader>
+                    <Separator />
+                    <CardContent className="p-0 flex-1">
+                      <ScrollArea className="h-full">
+                        <div ref={textContainerRef} className="p-6 text-sm leading-relaxed whitespace-pre-wrap font-body">
+                          {selectedDoc.content}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </div>
 
-              <div className="flex flex-col h-full max-h-[calc(100vh-3rem)]">
-                <header className="flex items-center h-[72px] pb-4">
-                    <h1 className="font-headline text-2xl font-bold">AI Analysis</h1>
-                </header>
-                <Card className="flex-1 flex flex-col shadow-md">
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                        <TabsList className="m-4">
-                            <TabsTrigger value="summary">Clause Summary</TabsTrigger>
-                            <TabsTrigger value="risk" disabled={selectedDoc.type !== 'contract'}>Risk Analysis</TabsTrigger>
-                        </TabsList>
-                        <Separator />
-                        <TabsContent value="summary" className="flex-1 m-0">
-                            <div className="p-4 flex flex-col h-full">
-                                <div className="mb-4">
-                                    <h3 className="font-headline text-lg">Summarize Clause</h3>
-                                    <p className="text-sm text-muted-foreground">Highlight text in the document to select a clause.</p>
-                                </div>
-                                {selectedText && (
-                                    <Card className="mb-4 bg-primary/5 border-primary/20">
-                                        <CardContent className="p-4 text-sm text-primary/80 italic">
-                                            "{selectedText.substring(0, 150)}{selectedText.length > 150 ? '...' : ''}"
-                                        </CardContent>
-                                    </Card>
-                                )}
-                                <Button onClick={onSummarize} disabled={isSummarizePending || !selectedText}>
-                                    {isSummarizePending ? (
-                                        <Loader2 className="mr-2 size-4 animate-spin" />
-                                    ) : (
-                                        <Sparkles className="mr-2 size-4" />
-                                    )}
-                                    Generate Summary
-                                </Button>
-                                {(summary || isSummarizePending) && (
-                                     <Card className="mt-4 flex-1">
-                                        <CardContent className="p-4 h-full">
-                                            <ScrollArea className="h-[300px]">
-                                                {isSummarizePending ? (
-                                                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                                                        <Loader2 className="mr-2 size-4 animate-spin" />
-                                                        <span>Generating summary...</span>
-                                                    </div>
-                                                ) : (
-                                                    <p className="whitespace-pre-wrap text-sm">{summary}</p>
-                                                )}
-                                            </ScrollArea>
-                                        </CardContent>
-                                    </Card>
-                                )}
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="risk" className="flex-1 m-0">
-                             <div className="p-4 flex flex-col h-full">
-                                {isRiskPending && (
-                                    <div className="flex items-center justify-center h-full">
-                                        <Loader2 className="mr-2 size-8 animate-spin text-primary" />
-                                        <span className="font-headline">Analyzing contract...</span>
-                                    </div>
-                                )}
-                                {riskAnalysis && !isRiskPending && (
-                                     <Card className="flex-1">
-                                        <CardHeader>
-                                            <CardTitle className="font-headline flex items-center gap-2"><Shield className="text-destructive"/>Risk Analysis Report</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <ScrollArea className="h-[400px] md:h-[calc(100vh-18rem)]">
-                                                <p className="whitespace-pre-wrap text-sm">{riskAnalysis}</p>
-                                            </ScrollArea>
-                                        </CardContent>
-                                    </Card>
-                                )}
-                                {!riskAnalysis && !isRiskPending && selectedDoc.type === 'contract' && (
-                                    <div className="text-center text-muted-foreground mt-8">
-                                        Click "Analyze for Risks" to generate a report for this contract.
-                                    </div>
-                                )}
-                             </div>
-                        </TabsContent>
-                    </Tabs>
-                </Card>
+                <div className="flex flex-col h-full max-h-[calc(100vh-3rem)]">
+                  <header className="flex items-center h-[72px] pb-4">
+                      <h1 className="font-headline text-2xl font-bold">AI Analysis</h1>
+                  </header>
+                  <Card className="flex-1 flex flex-col shadow-xl bg-card/80 backdrop-blur-sm border-primary/20">
+                      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+                          <TabsList className="m-4">
+                              <TabsTrigger value="summary">Clause Summary</TabsTrigger>
+                              <TabsTrigger value="risk" disabled={selectedDoc.type !== 'contract'}>Risk Analysis</TabsTrigger>
+                          </TabsList>
+                          <Separator />
+                          <TabsContent value="summary" className="flex-1 m-0">
+                              <div className="p-4 flex flex-col h-full">
+                                  <div className="mb-4">
+                                      <h3 className="font-headline text-lg">Summarize Clause</h3>
+                                      <p className="text-sm text-muted-foreground">Highlight text in the document to select a clause.</p>
+                                  </div>
+                                  {selectedText && (
+                                      <Card className="mb-4 bg-primary/5 border-primary/20">
+                                          <CardContent className="p-4 text-sm text-primary/80 italic">
+                                              "{selectedText.substring(0, 150)}{selectedText.length > 150 ? '...' : ''}"
+                                          </CardContent>
+                                      </Card>
+                                  )}
+                                  <Button onClick={onSummarize} disabled={isSummarizePending || !selectedText}>
+                                      {isSummarizePending ? (
+                                          <Loader2 className="mr-2 size-4 animate-spin" />
+                                      ) : (
+                                          <Sparkles className="mr-2 size-4" />
+                                      )}
+                                      Generate Summary
+                                  </Button>
+                                  {(summary || isSummarizePending) && (
+                                      <Card className="mt-4 flex-1">
+                                          <CardContent className="p-4 h-full">
+                                              <ScrollArea className="h-[300px]">
+                                                  {isSummarizePending ? (
+                                                      <div className="flex items-center justify-center h-full text-muted-foreground">
+                                                          <Loader2 className="mr-2 size-4 animate-spin" />
+                                                          <span>Generating summary...</span>
+                                                      </div>
+                                                  ) : (
+                                                      <p className="whitespace-pre-wrap text-sm">{summary}</p>
+                                                  )}
+                                              </ScrollArea>
+                                          </CardContent>
+                                      </Card>
+                                  )}
+                              </div>
+                          </TabsContent>
+                          <TabsContent value="risk" className="flex-1 m-0">
+                              <div className="p-4 flex flex-col h-full">
+                                  {isRiskPending && (
+                                      <div className="flex items-center justify-center h-full">
+                                          <Loader2 className="mr-2 size-8 animate-spin text-primary" />
+                                          <span className="font-headline">Analyzing contract...</span>
+                                      </div>
+                                  )}
+                                  {riskAnalysis && !isRiskPending && (
+                                      <Card className="flex-1">
+                                          <CardHeader>
+                                              <CardTitle className="font-headline flex items-center gap-2"><Shield className="text-destructive"/>Risk Analysis Report</CardTitle>
+                                          </CardHeader>
+                                          <CardContent>
+                                              <ScrollArea className="h-[400px] md:h-[calc(100vh-18rem)]">
+                                                  <p className="whitespace-pre-wrap text-sm">{riskAnalysis}</p>
+                                              </ScrollArea>
+                                          </CardContent>
+                                      </Card>
+                                  )}
+                                  {!riskAnalysis && !isRiskPending && selectedDoc.type === 'contract' && (
+                                      <div className="text-center text-muted-foreground mt-8">
+                                          Click "Analyze for Risks" to generate a report for this contract.
+                                      </div>
+                                  )}
+                              </div>
+                          </TabsContent>
+                      </Tabs>
+                  </Card>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center p-4">
-               <div className="flex items-center gap-4">
-                 <LegalMindLogo className="h-16 w-16 text-primary" />
-                <h1 className="font-headline text-5xl font-bold">Welcome to LegalMind AI</h1>
+            ) : (
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center p-4">
+                <div className="flex items-center gap-4">
+                  <LegalMindLogo className="h-16 w-16 text-primary" />
+                  <h1 className="font-headline text-5xl font-bold">Welcome to LegalMind AI</h1>
+                </div>
+                <p className="max-w-md text-lg text-muted-foreground">
+                  Your AI-powered document assistant. Select a document from the sidebar to get started, or upload a new one.
+                </p>
+                <div className='flex items-center gap-2 mt-4'>
+                  <ThemeToggle />
+                  <SidebarTrigger className="md:hidden" />
+                </div>
               </div>
-              <p className="max-w-md text-lg text-muted-foreground">
-                Your AI-powered document assistant. Select a document from the sidebar to get started, or upload a new one.
-              </p>
-               <div className='flex items-center gap-2 mt-4'>
-                 <ThemeToggle />
-                 <SidebarTrigger className="md:hidden" />
-               </div>
-            </div>
-          )}
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+            )}
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </>
   );
 }
