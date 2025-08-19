@@ -9,10 +9,10 @@ export async function handleSummarizeClause(clauseText: string) {
   }
   try {
     const result = await summarizeClause({ clauseText });
-    return result;
+    return { summary: result.summary };
   } catch (error) {
     console.error('Error summarizing clause:', error);
-    return { summary: "An error occurred while summarizing. Please try again." };
+    return { error: "An error occurred while summarizing. Please try again." };
   }
 }
 
@@ -22,9 +22,9 @@ export async function handleAnalyzeRisk(contractText: string) {
   }
   try {
     const result = await analyzeContractRisk({ contractText });
-    return result;
+    return { riskSummary: result.riskSummary };
   } catch (error) {
     console.error('Error analyzing risk:', error);
-    return { riskSummary: "An error occurred during risk analysis. Please try again." };
+    return { error: "An error occurred during risk analysis. Please try again." };
   }
 }

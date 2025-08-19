@@ -9,6 +9,9 @@ import {
   Loader2,
   Sparkles,
   Upload,
+  Trash2,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -21,16 +24,29 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarTrigger,
+  SidebarMenuAction,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { documents, type Document } from '@/lib/data';
+import { Document, documents as initialDocuments } from '@/lib/data';
 import { handleSummarizeClause, handleAnalyzeRisk } from '@/lib/actions';
-import { LexiDocLogo } from './icons';
+import { LegalMindLogo } from './icons';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from 'next-themes';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const documentIcons = {
   contract: <FileText />,
@@ -38,11 +54,28 @@ const documentIcons = {
   proposal: <FilePlus2 />,
 };
 
+function ThemeToggle() {
+    const { setTheme, theme } = useTheme();
+    
+    return (
+        <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        >
+            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+        </Button>
+    )
+}
+
 export function Dashboard() {
   const [isSummarizePending, startSummarizeTransition] = useTransition();
   const [isRiskPending, startRiskTransition] = useTransition();
   
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(documents[0]);
+  const [documents, setDocuments] = useState<Document[]>(initialDocuments);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(documents[0] || null);
   const [selectedText, setSelectedText] = useState('');
   const [summary, setSummary] = useState('');
   const [riskAnalysis, setRiskAnalysis] = useState('');
@@ -80,7 +113,12 @@ export function Dashboard() {
     }
     startSummarizeTransition(async () => {
       const result = await handleSummarizeClause(selectedText);
-      setSummary(result.summary);
+      if (result.error) {
+          toast({ title: "Error", description: result.error, variant: "destructive" });
+          setSummary('');
+      } else {
+        setSummary(result.summary!);
+      }
     });
   };
 
@@ -90,7 +128,12 @@ export function Dashboard() {
     setActiveTab('risk');
     startRiskTransition(async () => {
       const result = await handleAnalyzeRisk(selectedDoc.content);
-      setRiskAnalysis(result.riskSummary);
+      if (result.error) {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+        setRiskAnalysis('');
+      } else {
+        setRiskAnalysis(result.riskSummary!);
+      }
     });
   };
 
@@ -102,15 +145,29 @@ export function Dashboard() {
     setActiveTab('summary');
   };
 
+  const deleteDocument = (docId: string) => {
+    setDocuments(docs => {
+        const newDocs = docs.filter(d => d.id !== docId);
+        if (selectedDoc?.id === docId) {
+            setSelectedDoc(newDocs.length > 0 ? newDocs[0] : null);
+        }
+        return newDocs;
+    });
+    toast({
+        title: "Document Deleted",
+        description: "The document has been successfully deleted.",
+    })
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
-              <LexiDocLogo className="size-7 text-primary" />
+              <LegalMindLogo className="size-7 text-primary" />
               <h2 className="font-headline text-2xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
-                LexiDoc
+                LegalMind
               </h2>
             </div>
           </SidebarHeader>
@@ -126,6 +183,27 @@ export function Dashboard() {
                     {documentIcons[doc.type]}
                     <span>{doc.name}</span>
                   </SidebarMenuButton>
+                   <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                          <SidebarMenuAction showOnHover>
+                              <Trash2 />
+                          </SidebarMenuAction>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the document "{doc.name}".
+                              </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteDocument(doc.id)}>
+                                  Delete
+                              </AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialog>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -143,11 +221,14 @@ export function Dashboard() {
             <div className="grid md:grid-cols-2 flex-1 gap-4 p-4 md:p-6">
               <div className="flex flex-col h-full max-h-[calc(100vh-3rem)]">
                 <header className="flex items-center justify-between pb-4">
-                  <div>
+                  <div className="flex-1">
                     <h1 className="font-headline text-2xl font-bold">{selectedDoc.name}</h1>
                     <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {selectedDoc.createdAt}</p>
                   </div>
-                  <SidebarTrigger className="md:hidden" />
+                  <div className='flex items-center gap-2'>
+                    <ThemeToggle />
+                    <SidebarTrigger className="md:hidden" />
+                  </div>
                 </header>
                 <Card className="flex-1 flex flex-col shadow-md">
                   <CardHeader className="flex flex-row items-center justify-between">
@@ -166,7 +247,7 @@ export function Dashboard() {
                   <Separator />
                   <CardContent className="p-0 flex-1">
                     <ScrollArea className="h-full">
-                      <div ref={textContainerRef} className="p-6 text-sm leading-relaxed whitespace-pre-wrap selection:bg-accent/30 font-body">
+                      <div ref={textContainerRef} className="p-6 text-sm leading-relaxed whitespace-pre-wrap font-body">
                         {selectedDoc.content}
                       </div>
                     </ScrollArea>
@@ -244,7 +325,7 @@ export function Dashboard() {
                                         </CardContent>
                                     </Card>
                                 )}
-                                {!riskAnalysis && !isRiskPending && (
+                                {!riskAnalysis && !isRiskPending && selectedDoc.type === 'contract' && (
                                     <div className="text-center text-muted-foreground mt-8">
                                         Click "Analyze for Risks" to generate a report for this contract.
                                     </div>
@@ -257,14 +338,17 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center p-4">
-              <div className="flex items-center gap-4">
-                <LexiDocLogo className="h-16 w-16 text-primary" />
-                <h1 className="font-headline text-5xl font-bold">Welcome to LexiDoc</h1>
+               <div className="flex items-center gap-4">
+                 <LegalMindLogo className="h-16 w-16 text-primary" />
+                <h1 className="font-headline text-5xl font-bold">Welcome to LegalMind AI</h1>
               </div>
               <p className="max-w-md text-lg text-muted-foreground">
                 Your AI-powered document assistant. Select a document from the sidebar to get started, or upload a new one.
               </p>
-               <SidebarTrigger className="md:hidden" />
+               <div className='flex items-center gap-2 mt-4'>
+                 <ThemeToggle />
+                 <SidebarTrigger className="md:hidden" />
+               </div>
             </div>
           )}
         </SidebarInset>

@@ -35,9 +35,18 @@ const prompt = ai.definePrompt({
   name: 'analyzeContractRiskPrompt',
   input: {schema: AnalyzeContractRiskInputSchema},
   output: {schema: AnalyzeContractRiskOutputSchema},
-  prompt: `You are a legal expert specializing in contract risk analysis.
+  prompt: `You are a legal expert specializing in contract risk analysis. You are thorough, precise, and your goal is to protect your client's interests.
 
-You will analyze the following contract text for potential risks and provide a summary of your findings, including specific clauses of concern and potential consequences.
+You will analyze the following contract text for potential risks. Your analysis should be comprehensive and presented in a clear, structured format.
+
+For each identified risk, provide:
+1.  **Risk Category:** (e.g., Liability, Confidentiality, Termination, IP Rights, etc.)
+2.  **Clause Reference:** The specific clause number or section.
+3.  **Risk Description:** A clear explanation of the potential risk.
+4.  **Severity Level:** (Low, Medium, High)
+5.  **Suggested Mitigation:** Actionable advice on how to mitigate the risk (e.g., suggest alternative wording, recommend negotiation points).
+
+Present your findings in a well-formatted markdown response. Start with an overall summary of the contract's risk profile.
 
 Contract Text:
 {{{contractText}}}`,
