@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { LegalMindLogo } from '@/components/icons';
 import { motion } from 'framer-motion';
 import { DarkVeil } from '@/components/dark-veil';
-import { ShieldCheck, FileText, CheckCircle, Scale, Users, Bot, IndianRupee, Languages, Wand, CalendarClock, ArrowRight } from 'lucide-react';
+import { ShieldCheck, FileText, CheckCircle, Scale, Users, Bot, IndianRupee, Languages, Wand, CalendarClock, ArrowRight, BrainCircuit, Search, FileUp, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 
@@ -23,22 +23,22 @@ export default function LandingPage() {
     {
       title: 'Text Extraction',
       description: 'Upload PDFs, Word files, or scanned docs. Extract clean text using advanced OCR.',
-      icon: <FileText className="size-8 text-primary" />
+      icon: <FileUp className="size-8 text-primary" />
     },
     {
       title: 'Clause Segmentation',
       description: 'Break contracts into clear, digestible clauses. Powered by regex + AI for better accuracy.',
-      icon: <CheckCircle className="size-8 text-primary" />
+      icon: <BrainCircuit className="size-8 text-primary" />
     },
     {
       title: 'Contract Summarizer',
-      description: 'Summarizes each clause in plain English, Hindi, and more. Highlights key sections like payment, IP, and termination.',
+      description: 'Summarizes each clause in plain English, Hindi, and more. Highlights key sections.',
       icon: <Languages className="size-8 text-primary" />
     },
     {
       title: 'Risk Analyzer',
       description: 'Flags risky or unfair clauses, detects missing protections, and provides a risk score with reasoning.',
-      icon: <ShieldCheck className="size-8 text-primary" />
+      icon: <Search className="size-8 text-primary" />
     },
   ];
   
@@ -158,15 +158,17 @@ export default function LandingPage() {
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             viewport={{ once: true }}
                         >
-                          <Card className="h-full border-primary/10 bg-card/50 p-6 text-left backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-card/80 hover:-translate-y-2">
-                            <CardHeader className="p-0">
-                                {feature.icon}
-                                <CardTitle className="font-headline text-xl font-bold mt-4">{feature.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0 mt-2">
-                                <p className="text-sm text-muted-foreground">{feature.description}</p>
-                            </CardContent>
-                          </Card>
+                          <div className="h-full rounded-lg star-border-card glare-card">
+                            <div className="h-full p-6 text-left star-border-content">
+                              <CardHeader className="p-0">
+                                  {feature.icon}
+                                  <CardTitle className="font-headline text-xl font-bold mt-4">{feature.title}</CardTitle>
+                              </CardHeader>
+                              <CardContent className="p-0 mt-2">
+                                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                              </CardContent>
+                            </div>
+                          </div>
                         </motion.div>
                     ))}
                  </div>
@@ -257,5 +259,3 @@ export default function LandingPage() {
     </>
   );
 }
-
-    

@@ -120,3 +120,119 @@ body {
         opacity: 0;
     }
 }
+
+/* Glare Effect */
+.glare-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.glare-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 75%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsla(0, 0%, 100%, 0.2),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: left 0.7s ease-in-out;
+}
+
+.dark .glare-card::before {
+    background: linear-gradient(
+    90deg,
+    transparent,
+    hsla(0, 0%, 100%, 0.05),
+    transparent
+  );
+}
+
+
+.glare-card:hover::before {
+  left: 150%;
+}
+
+/* Star Border Effect */
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+.star-border-card {
+  --border-color: cyan;
+  --border-thickness: 2.5px;
+  --border-speed: 5s;
+  --bg-color: hsl(var(--card));
+  position: relative;
+  border: 0;
+  background-color: transparent;
+}
+
+.star-border-card::before,
+.star-border-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 50%,
+    var(--border-color),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.star-border-card::before {
+    animation: spin var(--border-speed) linear infinite paused;
+}
+
+.star-border-card:hover::before,
+.star-border-card:hover::after {
+  opacity: 1;
+}
+
+.star-border-card:hover::before {
+    animation-play-state: running;
+}
+
+@keyframes spin {
+  from {
+    --border-angle: 0deg;
+  }
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+.star-border-card .star-border-content {
+  position: relative;
+  z-index: 1;
+  background-color: var(--bg-color);
+  border: 1px solid hsl(var(--border));
+  border-radius: inherit;
+  width: 100%;
+  height: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.star-border-card:hover .star-border-content {
+    background-color: hsl(var(--card) / 0.8);
+    border-color: hsl(var(--border) / 0.3);
+}
+
+.dark .star-border-card .star-border-content {
+    --bg-color: hsl(var(--card));
+}
+
+.dark .star-border-card:hover .star-border-content {
+    background-color: hsl(var(--card) / 0.8);
+}
