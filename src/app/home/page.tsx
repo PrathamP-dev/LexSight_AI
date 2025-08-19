@@ -13,12 +13,15 @@ import { useRef } from 'react';
 export default function HomePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTextSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // In a real app, you would process the text here and then navigate.
-    // For this prototype, we'll navigate directly to the dashboard.
-    router.push('/dashboard');
+    const text = textAreaRef.current?.value;
+    if (text) {
+      sessionStorage.setItem('pastedText', text);
+      router.push('/dashboard');
+    }
   };
   
   const handleFileUploadClick = () => {
@@ -28,10 +31,13 @@ export default function HomePage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real app, you would handle the file upload here.
-      // For this prototype, we'll navigate directly to the dashboard.
-      console.log('Selected file:', file.name);
-      router.push('/dashboard');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        sessionStorage.setItem('uploadedFile', JSON.stringify({ name: file.name, content: text }));
+        router.push('/dashboard');
+      };
+      reader.readAsText(file);
     }
   };
 
@@ -96,7 +102,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleTextSubmit} className="flex flex-col gap-4">
-                  <Textarea placeholder="Paste your contract text here..." className="h-24" />
+                  <Textarea ref={textAreaRef} placeholder="Paste your contract text here..." className="h-24" />
                   <Button type="submit" className="w-full font-headline">
                     Analyze Text
                     <ArrowRight className="ml-2 size-4" />

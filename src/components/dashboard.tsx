@@ -75,13 +75,50 @@ export function Dashboard() {
   const [isRiskPending, startRiskTransition] = useTransition();
   
   const [documents, setDocuments] = useState<Document[]>(initialDocuments);
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(documents[0] || null);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const [summary, setSummary] = useState('');
   const [riskAnalysis, setRiskAnalysis] = useState('');
   const [activeTab, setActiveTab] = useState('summary');
   const textContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const pastedText = sessionStorage.getItem('pastedText');
+    if (pastedText) {
+      const newDoc: Document = {
+        id: `doc-${Date.now()}`,
+        name: 'Pasted Document',
+        type: 'contract',
+        content: pastedText,
+        createdAt: new Date().toISOString().split('T')[0],
+      };
+      setDocuments(docs => [newDoc, ...docs]);
+      setSelectedDoc(newDoc);
+      sessionStorage.removeItem('pastedText');
+    }
+
+    const uploadedFileRaw = sessionStorage.getItem('uploadedFile');
+    if (uploadedFileRaw) {
+      const uploadedFile = JSON.parse(uploadedFileRaw);
+      const newDoc: Document = {
+        id: `doc-${Date.now()}`,
+        name: uploadedFile.name,
+        type: 'contract', // Simple default, could be improved
+        content: uploadedFile.content,
+        createdAt: new Date().toISOString().split('T')[0],
+      };
+      setDocuments(docs => [newDoc, ...docs]);
+      setSelectedDoc(newDoc);
+      sessionStorage.removeItem('uploadedFile');
+    }
+
+    if (!pastedText && !uploadedFileRaw && documents.length > 0) {
+        setSelectedDoc(documents[0]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleTextSelection = useCallback(() => {
     const text = window.getSelection()?.toString().trim() ?? '';
@@ -133,6 +170,7 @@ export function Dashboard() {
         setRiskAnalysis('');
       } else {
         setRiskAnalysis(result.riskSummary!);
+        setActiveTab('risk');
       }
     });
   };
@@ -157,6 +195,34 @@ export function Dashboard() {
         title: "Document Deleted",
         description: "The document has been successfully deleted.",
     })
+  };
+
+  const handleFileUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const newDoc: Document = {
+          id: `doc-${Date.now()}`,
+          name: file.name,
+          type: 'contract',
+          content: text,
+          createdAt: new Date().toISOString().split('T')[0],
+        };
+        setDocuments(docs => [newDoc, ...docs]);
+        setSelectedDoc(newDoc);
+        toast({
+            title: "Document Uploaded",
+            description: `"${file.name}" has been successfully added.`,
+        });
+      };
+      reader.readAsText(file);
+    }
   };
 
   return (
@@ -211,7 +277,14 @@ export function Dashboard() {
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
-              <Button variant="default" className="w-full">
+              <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept=".pdf,.docx,.txt"
+              />
+              <Button variant="default" className="w-full" onClick={handleFileUploadClick}>
                 <Upload className="mr-2 size-4" />
                 <span className="group-data-[collapsible=icon]:hidden">Upload Document</span>
               </Button>
@@ -292,7 +365,7 @@ export function Dashboard() {
                                   {(summary || isSummarizePending) && (
                                       <Card className="mt-4 flex-1">
                                           <CardContent className="p-4 h-full">
-                                              <ScrollArea className="h-[300px]">
+                                              <ScrollArea className="h-full min-h-[200px]">
                                                   {isSummarizePending ? (
                                                       <div className="flex items-center justify-center h-full text-muted-foreground">
                                                           <Loader2 className="mr-2 size-4 animate-spin" />
@@ -309,7 +382,7 @@ export function Dashboard() {
                           </TabsContent>
                           <TabsContent value="risk" className="flex-1 m-0">
                               <div className="p-4 flex flex-col h-full">
-                                  {isRiskPending && (
+                                  {isRiskPending && !riskAnalysis && (
                                       <div className="flex items-center justify-center h-full">
                                           <Loader2 className="mr-2 size-8 animate-spin text-primary" />
                                           <span className="font-headline">Analyzing contract...</span>
@@ -321,7 +394,7 @@ export function Dashboard() {
                                               <CardTitle className="font-headline flex items-center gap-2"><Shield className="text-destructive"/>Risk Analysis Report</CardTitle>
                                           </CardHeader>
                                           <CardContent>
-                                              <ScrollArea className="h-[400px] md:h-[calc(100vh-18rem)]">
+                                              <ScrollArea className="h-[400px] md:h-[calc(100vh-22rem)]">
                                                   <p className="whitespace-pre-wrap text-sm">{riskAnalysis}</p>
                                               </ScrollArea>
                                           </CardContent>
