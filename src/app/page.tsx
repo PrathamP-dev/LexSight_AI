@@ -1,10 +1,10 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { LegalMindLogo } from '@/components/icons';
 import { motion } from 'framer-motion';
-import { ScrambleText } from '@/components/scramble-text';
 import { DarkVeil } from '@/components/dark-veil';
 
 export default function LandingPage() {
@@ -62,7 +62,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 className="font-headline text-5xl font-bold tracking-tighter md:text-7xl">
-                <ScrambleText text="Revolutionize Your Legal Workflow" />
+                Revolutionize Your Legal Workflow
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
                 Leverage the power of AI to analyze, summarize, and manage your legal documents with unprecedented speed and accuracy.
