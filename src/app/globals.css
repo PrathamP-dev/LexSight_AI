@@ -165,6 +165,12 @@ body {
   initial-value: 0deg;
 }
 
+@keyframes spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
 .star-border-card {
   --border-color: cyan;
   --border-thickness: 2.5px;
@@ -173,14 +179,16 @@ body {
   position: relative;
   border: 0;
   background-color: transparent;
+  border-radius: 0.5rem; /* Match card rounding */
 }
 
 .star-border-card::before,
 .star-border-card::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: calc(var(--border-thickness) * -1);
   border-radius: inherit;
+  z-index: 0;
   background: conic-gradient(
     from var(--border-angle),
     transparent 50%,
@@ -204,7 +212,7 @@ body {
     animation-play-state: running;
 }
 
-.star-border-card .star-border-content {
+.star-border-content {
   position: relative;
   z-index: 1;
   background-color: var(--bg-color);
@@ -217,10 +225,10 @@ body {
 
 .star-border-card:hover .star-border-content {
     background-color: hsl(var(--card) / 0.8);
-    border-color: hsl(var(--border) / 0.3);
+    border-color: transparent;
 }
 
-.dark .star-border-card .star-border-content {
+.dark .star-border-card {
     --bg-color: hsl(var(--card));
 }
 

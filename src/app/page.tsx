@@ -156,9 +156,9 @@ export default function LandingPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             viewport={{ once: true }}
+                            className="h-full rounded-lg star-border-card"
                         >
-                          <div className="h-full rounded-lg star-border-card glare-card">
-                            <div className="h-full p-6 text-left star-border-content">
+                            <div className="h-full p-6 text-left star-border-content glare-card">
                               <CardHeader className="p-0">
                                   {feature.icon}
                                   <CardTitle className="font-headline text-xl font-bold mt-4">{feature.title}</CardTitle>
@@ -167,7 +167,6 @@ export default function LandingPage() {
                                   <p className="text-sm text-muted-foreground">{feature.description}</p>
                               </CardContent>
                             </div>
-                          </div>
                         </motion.div>
                     ))}
                  </div>
