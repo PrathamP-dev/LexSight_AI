@@ -94,58 +94,6 @@ body {
   }
 }
 
-.dark-veil {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -10;
-  overflow: hidden;
-}
-
-.dark-veil::before, .dark-veil::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200vw;
-  height: 200vh;
-  background: radial-gradient(circle, hsla(var(--primary), 0.3) 0%, transparent 40%),
-              radial-gradient(circle, hsla(var(--accent), 0.2) 0%, transparent 35%);
-  background-size: 100% 100%;
-  mix-blend-mode: screen;
-  filter: blur(60px);
-  animation: warp 20s linear infinite alternate;
-  transform-origin: center center;
-}
-
-.dark-veil::after {
-  width: 150vw;
-  height: 150vh;
-  background: radial-gradient(circle, hsla(var(--primary), 0.2) 0%, transparent 30%);
-  animation: warp 15s linear infinite alternate-reverse;
-  animation-delay: -5s;
-}
-
-@keyframes warp {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  25% {
-    transform: translate(-50%, -50%) rotate(90deg) scale(1.2);
-  }
-  50% {
-    transform: translate(-50%, -50%) rotate(180deg) scale(1);
-  }
-  75% {
-     transform: translate(-50%, -50%) rotate(270deg) scale(1.2);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg) scale(1);
-  }
-}
-
 .sparkle {
     position: absolute;
     width: 8px;

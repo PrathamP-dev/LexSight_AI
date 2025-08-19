@@ -8,9 +8,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LegalMindLogo } from '@/components/icons';
 import { useRouter } from 'next/navigation';
+import { useRef } from 'react';
 
 export default function HomePage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTextSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -18,10 +20,25 @@ export default function HomePage() {
     // For this prototype, we'll navigate directly to the dashboard.
     router.push('/dashboard');
   };
+  
+  const handleFileUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // In a real app, you would handle the file upload here.
+      // For this prototype, we'll navigate directly to the dashboard.
+      console.log('Selected file:', file.name);
+      router.push('/dashboard');
+    }
+  };
+
 
   return (
     <>
-      <div className="dark-veil"></div>
+      <div className="fixed top-0 left-0 w-full h-full -z-10 bg-background"></div>
       <div className="relative flex min-h-screen flex-col items-center justify-center p-4">
         <header className="absolute top-0 left-0 right-0 p-4">
           <div className="container mx-auto flex items-center justify-between">
@@ -57,10 +74,15 @@ export default function HomePage() {
                 <p className="mb-4 text-muted-foreground">
                   Upload a file from your computer. Supported formats: PDF, DOCX, TXT.
                 </p>
-                <Button className="w-full font-headline">
-                  <Link href="/dashboard" className="flex w-full items-center justify-center">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept=".pdf,.docx,.txt"
+                />
+                <Button onClick={handleFileUploadClick} className="w-full font-headline">
                     Select File
-                  </Link>
                 </Button>
               </CardContent>
             </Card>
