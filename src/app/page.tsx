@@ -32,11 +32,11 @@ export default function LandingPage() {
       <div className="fixed top-0 left-0 w-full h-full -z-10">
         <DarkVeil
           speed={0.5}
-          hueShift={0}
-          noiseIntensity={0.03}
+          hueShift={50}
+          noiseIntensity={0}
           scanlineFrequency={0}
           scanlineIntensity={0}
-          warpAmount={0.5}
+          warpAmount={0}
         />
       </div>
       <div className="relative min-h-screen w-full overflow-hidden">
