@@ -14,7 +14,6 @@ const PARTICLE_SPEED = 60; // Base speed in pixels
 
 const THEME_COLORS = [
     'hsl(180, 100%, 25%)', // deep teal (primary)
-    'hsl(30, 58%, 64%)',  // pale gold (accent)
     'hsl(175, 68%, 95%)', // light teal (background)
 ];
 
