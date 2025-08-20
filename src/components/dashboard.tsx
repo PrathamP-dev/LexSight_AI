@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   FileText,
   FileBarChart2,
@@ -12,6 +13,10 @@ import {
   Trash2,
   Moon,
   Sun,
+  Download,
+  User,
+  LogOut,
+  Plus,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -25,6 +30,7 @@ import {
   SidebarInset,
   SidebarTrigger,
   SidebarMenuAction,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +53,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 
 const documentIcons = {
   contract: <FileText />,
@@ -237,6 +253,47 @@ export function Dashboard() {
         fileInputRef.current.value = '';
     }
   };
+  
+  const handleDownloadReport = () => {
+    if (!summary && !riskAnalysis) {
+        toast({
+            title: "No Content to Download",
+            description: "Please generate a summary or risk analysis first.",
+            variant: "destructive"
+        });
+        return;
+    }
+
+    let reportContent = `LegalMind AI Analysis Report\n`;
+    reportContent += `Document: ${selectedDoc?.name}\n`;
+    reportContent += `Generated On: ${new Date().toLocaleString()}\n`;
+    reportContent += "========================================\n\n";
+
+    if (summary) {
+        reportContent += "--- Clause Summary ---\n";
+        reportContent += `${summary}\n\n`;
+    }
+
+    if (riskAnalysis) {
+        reportContent += "--- Risk Analysis ---\n";
+        reportContent += `${riskAnalysis}\n\n`;
+    }
+    
+    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `LegalMind_Report_${selectedDoc?.name.replace(/ /g,"_")}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+        title: "Report Downloaded",
+        description: "The analysis report has been saved.",
+    });
+  };
 
   return (
     <>
@@ -297,10 +354,46 @@ export function Dashboard() {
                   className="hidden"
                   accept=".pdf,.docx,.txt"
               />
-              <Button variant="default" className="w-full" onClick={handleFileUploadClick}>
+              <Button variant="default" className="w-full mb-2" onClick={handleFileUploadClick}>
                 <Upload className="mr-2 size-4" />
                 <span className="group-data-[collapsible=icon]:hidden">Upload Document</span>
               </Button>
+              <SidebarSeparator />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                         <Button variant="ghost" className="w-full justify-start h-auto p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:size-8">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="size-7">
+                                    <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                                    <AvatarFallback>U</AvatarFallback>
+                                </Avatar>
+                                <div className="text-left group-data-[collapsible=icon]:hidden">
+                                    <p className="text-sm font-medium">Test User</p>
+                                    <p className="text-xs text-muted-foreground">user@example.com</p>
+                                </div>
+                            </div>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 mb-2" side="top" align="start">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                            <User className="mr-2" />
+                            <span>Profile</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Plus className="mr-2" />
+                            <span>Add Account</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <Link href="/login">
+                            <DropdownMenuItem>
+                                <LogOut className="mr-2" />
+                                <span>Log out</span>
+                            </DropdownMenuItem>
+                        </Link>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </SidebarFooter>
           </Sidebar>
 
@@ -344,8 +437,12 @@ export function Dashboard() {
                 </div>
 
                 <div className="flex flex-col h-full max-h-[calc(100vh-3rem)]">
-                  <header className="flex items-center h-[72px] pb-4">
+                   <header className="flex items-center justify-between h-[72px] pb-4">
                       <h1 className="font-headline text-2xl font-bold">AI Analysis</h1>
+                       <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!summary && !riskAnalysis}>
+                          <Download className="mr-2 size-4"/>
+                          Download Report
+                       </Button>
                   </header>
                   <Card className="flex-1 flex flex-col shadow-xl bg-card/80 backdrop-blur-sm border-primary/20">
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
@@ -404,7 +501,7 @@ export function Dashboard() {
                                   {riskAnalysis && !isRiskPending && (
                                       <Card className="flex-1">
                                           <CardHeader>
-                                              <CardTitle className="font-headline">
+                                              <CardTitle>
                                                 <div className="flex items-center gap-2">
                                                   <Shield className="text-destructive"/>
                                                   <span>Risk Analysis Report</span>
