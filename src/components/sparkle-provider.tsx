@@ -12,6 +12,12 @@ const PARTICLE_COUNT = 12;
 const PARTICLE_SIZE = 5; // Base size in pixels
 const PARTICLE_SPEED = 60; // Base speed in pixels
 
+const THEME_COLORS = [
+    'hsl(180, 100%, 25%)', // deep teal (primary)
+    'hsl(30, 58%, 64%)',  // pale gold (accent)
+    'hsl(175, 68%, 95%)', // light teal (background)
+];
+
 export const SparkleProvider = ({ children }: { children: React.ReactNode }) => {
 
     const createBurst = (e: MouseEvent) => {
@@ -29,7 +35,10 @@ export const SparkleProvider = ({ children }: { children: React.ReactNode }) => 
 
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
-            particle.style.background = `hsl(${Math.random() * 60 + 0}, 100%, 50%)`; // Shades of gold/orange
+            
+            // Use theme colors
+            const color = THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)];
+            particle.style.background = color;
             
             particle.style.left = `${e.clientX}px`;
             particle.style.top = `${e.clientY}px`;
