@@ -37,8 +37,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import type { Document } from '@/services/documents';
-import { addDocument, deleteDocument, getDocuments } from '@/services/documents';
+import { sampleDocuments, type Document } from '@/lib/data';
 import { handleSummarizeClause, handleAnalyzeRisk } from '@/lib/actions';
 import { LegalMindLogo } from './icons';
 import { useToast } from '@/hooks/use-toast';
@@ -63,7 +62,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useSearchParams } from 'next/navigation';
 
 
 const documentIcons = {
@@ -102,77 +100,61 @@ export function Dashboard() {
   const textContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const searchParams = useSearchParams();
 
-  const loadDocuments = useCallback(async () => {
+  const loadDocuments = useCallback(() => {
     setIsLoadingDocs(true);
-    try {
-      const docs = await getDocuments();
-      setDocuments(docs);
-      if (!selectedDoc && docs.length > 0) {
-        setSelectedDoc(docs[0]);
-      } else if (docs.length === 0) {
-        setSelectedDoc(null);
+    // In a real app, this would fetch from a database
+    // For now, we use sample data and session storage
+    const storedDocs = JSON.parse(sessionStorage.getItem('documents') || 'null');
+    const allDocs = storedDocs ? storedDocs : [...sampleDocuments];
+    setDocuments(allDocs);
+
+    if (allDocs.length > 0) {
+        // Check if there's a recently uploaded file or pasted text
+      const uploadedFileRaw = sessionStorage.getItem('uploadedFile');
+      const pastedText = sessionStorage.getItem('pastedText');
+
+      let newDoc: Document | null = null;
+      if (uploadedFileRaw) {
+        const uploadedFile = JSON.parse(uploadedFileRaw);
+        newDoc = {
+          id: `doc_${Date.now()}`,
+          name: uploadedFile.name,
+          type: 'contract',
+          content: uploadedFile.content,
+          createdAt: new Date().toISOString(),
+        };
+        sessionStorage.removeItem('uploadedFile');
+      } else if (pastedText) {
+        newDoc = {
+          id: `doc_${Date.now()}`,
+          name: `Pasted Document ${new Date().toLocaleDateString()}`,
+          type: 'contract',
+          content: pastedText,
+          createdAt: new Date().toISOString(),
+        };
+        sessionStorage.removeItem('pastedText');
       }
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-      toast({ title: "Error", description: "Could not fetch documents from the database.", variant: "destructive" });
+      
+      if (newDoc) {
+        const updatedDocs = [newDoc, ...allDocs];
+        setDocuments(updatedDocs);
+        setSelectedDoc(newDoc);
+        sessionStorage.setItem('documents', JSON.stringify(updatedDocs));
+      } else if (!selectedDoc || !allDocs.some(d => d.id === selectedDoc.id)) {
+        setSelectedDoc(allDocs[0]);
+      }
+    } else {
+        setSelectedDoc(null);
     }
+    
     setIsLoadingDocs(false);
-  }, [selectedDoc, toast]);
+  }, [selectedDoc]);
 
   useEffect(() => {
     loadDocuments();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleNewDocument = useCallback(async (docData: Omit<Document, 'id' | 'createdAt'>) => {
-    try {
-      const newDoc = await addDocument(docData);
-      await loadDocuments();
-      setSelectedDoc(newDoc);
-      // Reset analysis states
-      setSelectedText('');
-      setSummary('');
-      setRiskAnalysis('');
-      setActiveTab('summary');
-      return newDoc;
-    } catch (error) {
-      console.error("Error adding document:", error);
-      toast({ title: "Error", description: "Failed to save the new document.", variant: "destructive" });
-      return null;
-    }
-  }, [loadDocuments, toast]);
-
-  useEffect(() => {
-    const pastedText = searchParams.get('pastedText');
-    if (pastedText) {
-      handleNewDocument({
-        name: `Pasted Document ${new Date().toLocaleDateString()}`,
-        type: 'contract',
-        content: pastedText,
-      });
-      // Clear search params to avoid re-triggering
-      window.history.replaceState({}, '', '/dashboard');
-      return; 
-    }
-
-    const uploadedFileRaw = searchParams.get('uploadedFile');
-    if (uploadedFileRaw) {
-      try {
-        const uploadedFile = JSON.parse(uploadedFileRaw);
-        handleNewDocument({
-          name: uploadedFile.name,
-          type: 'contract',
-          content: uploadedFile.content,
-        });
-      } catch (e) {
-        console.error("Failed to parse uploaded file from search params", e);
-      } finally {
-        window.history.replaceState({}, '', '/dashboard');
-      }
-    }
-  }, [searchParams, handleNewDocument]);
 
 
   const handleTextSelection = useCallback(() => {
@@ -239,21 +221,17 @@ export function Dashboard() {
   };
 
   const handleDeleteDocument = async (docId: string) => {
-    try {
-        await deleteDocument(docId);
-        toast({
-            title: "Document Deleted",
-            description: "The document has been successfully deleted.",
-        })
-        await loadDocuments();
-        if (selectedDoc?.id === docId) {
-            const firstDoc = documents.length > 1 ? documents.find(d => d.id !== docId) : null;
-            setSelectedDoc(firstDoc || null);
-        }
-    } catch (error) {
-        console.error("Error deleting document:", error);
-        toast({ title: "Error", description: "Failed to delete the document.", variant: "destructive" });
+    const updatedDocs = documents.filter(doc => doc.id !== docId);
+    setDocuments(updatedDocs);
+    sessionStorage.setItem('documents', JSON.stringify(updatedDocs));
+
+    if (selectedDoc?.id === docId) {
+      setSelectedDoc(updatedDocs[0] || null);
     }
+    toast({
+        title: "Document Deleted",
+        description: "The document has been removed.",
+    });
   };
 
   const handleFileUploadClick = () => {
@@ -264,23 +242,27 @@ export function Dashboard() {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = async (e) => {
+      reader.onload = (e) => {
         const text = e.target?.result as string;
-        const newDoc = await handleNewDocument({
-          name: file.name,
-          type: 'contract',
-          content: text,
+        const newDoc: Document = {
+            id: `doc_${Date.now()}`,
+            name: file.name,
+            type: 'contract',
+            content: text,
+            createdAt: new Date().toISOString(),
+        };
+        const updatedDocs = [newDoc, ...documents];
+        setDocuments(updatedDocs);
+        setSelectedDoc(newDoc);
+        sessionStorage.setItem('documents', JSON.stringify(updatedDocs));
+        toast({
+            title: "Document Uploaded",
+            description: `"${file.name}" has been successfully added.`,
         });
-
-        if (newDoc) {
-          toast({
-              title: "Document Uploaded",
-              description: `"${file.name}" has been successfully added.`,
-          });
-        }
       };
       reader.readAsText(file);
     }
+    // Reset file input to allow uploading the same file again
     if (fileInputRef.current) {
         fileInputRef.current.value = '';
     }

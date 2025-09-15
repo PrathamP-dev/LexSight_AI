@@ -19,7 +19,8 @@ export default function HomePage() {
     event.preventDefault();
     const text = textAreaRef.current?.value;
     if (text) {
-      router.push(`/dashboard?pastedText=${encodeURIComponent(text)}`);
+      sessionStorage.setItem('pastedText', text);
+      router.push('/dashboard');
     }
   };
   
@@ -34,7 +35,8 @@ export default function HomePage() {
       reader.onload = (e) => {
         const text = e.target?.result as string;
         const fileInfo = { name: file.name, content: text };
-        router.push(`/dashboard?uploadedFile=${encodeURIComponent(JSON.stringify(fileInfo))}`);
+        sessionStorage.setItem('uploadedFile', JSON.stringify(fileInfo));
+        router.push('/dashboard');
       };
       reader.readAsText(file);
     }
