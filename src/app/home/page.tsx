@@ -3,27 +3,47 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { UploadCloud, FileText, ArrowRight } from 'lucide-react';
+import { UploadCloud, FileText, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LegalMindLogo } from '@/components/icons';
 import { useRouter } from 'next/navigation';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { addDocument } from '@/services/documents';
+import { useToast } from '@/hooks/use-toast';
 
 export default function HomePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
-  const handleTextSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateDocument = async (name: string, content: string) => {
+    setIsProcessing(true);
+    try {
+      const newDocId = await addDocument({ name, content, type: 'contract' });
+      router.push(`/dashboard?docId=${newDocId}`);
+    } catch (error) {
+      console.error("Failed to create document:", error);
+      toast({
+        title: "Error Creating Document",
+        description: "There was a problem saving your document. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
+  };
+
+  const handleTextSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = textAreaRef.current?.value;
     if (text) {
-      sessionStorage.setItem('pastedText', text);
-      router.push('/dashboard');
+      const docName = `Pasted Document ${new Date().toLocaleDateString()}`;
+      await handleCreateDocument(docName, text);
     }
   };
-  
+
   const handleFileUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -32,16 +52,13 @@ export default function HomePage() {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const text = e.target?.result as string;
-        const fileInfo = { name: file.name, content: text };
-        sessionStorage.setItem('uploadedFile', JSON.stringify(fileInfo));
-        router.push('/dashboard');
+        await handleCreateDocument(file.name, text);
       };
       reader.readAsText(file);
     }
   };
-
 
   return (
     <>
@@ -87,9 +104,10 @@ export default function HomePage() {
                   onChange={handleFileChange}
                   className="hidden"
                   accept=".pdf,.docx,.txt"
+                  disabled={isProcessing}
                 />
-                <Button onClick={handleFileUploadClick} className="w-full font-headline">
-                    Select File
+                <Button onClick={handleFileUploadClick} className="w-full font-headline" disabled={isProcessing}>
+                  {isProcessing ? <Loader2 className="animate-spin" /> : 'Select File'}
                 </Button>
               </CardContent>
             </Card>
@@ -103,10 +121,16 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleTextSubmit} className="flex flex-col gap-4">
-                  <Textarea ref={textAreaRef} placeholder="Paste your contract text here..." className="h-24" />
-                  <Button type="submit" className="w-full font-headline">
-                    Analyze Text
-                    <ArrowRight className="ml-2 size-4" />
+                  <Textarea ref={textAreaRef} placeholder="Paste your contract text here..." className="h-24" disabled={isProcessing} />
+                  <Button type="submit" className="w-full font-headline" disabled={isProcessing}>
+                    {isProcessing ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <>
+                        Analyze Text
+                        <ArrowRight className="ml-2 size-4" />
+                      </>
+                    )}
                   </Button>
                 </form>
               </CardContent>

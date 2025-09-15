@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useRef, useEffect, useCallback } from 'react';
+import { useState, useTransition, useRef, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import {
   FileText,
@@ -37,7 +37,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { sampleDocuments, type Document } from '@/lib/data';
+import type { Document } from '@/services/documents';
+import { getDocuments, deleteDocument, addDocument } from '@/services/documents';
 import { handleSummarizeClause, handleAnalyzeRisk } from '@/lib/actions';
 import { LegalMindLogo } from './icons';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +63,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSearchParams } from 'next/navigation';
 
 
 const documentIcons = {
@@ -86,7 +88,7 @@ function ThemeToggle() {
     )
 }
 
-export function Dashboard() {
+function DashboardContent() {
   const [isSummarizePending, startSummarizeTransition] = useTransition();
   const [isRiskPending, startRiskTransition] = useTransition();
   
@@ -100,61 +102,41 @@ export function Dashboard() {
   const textContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
-  const loadDocuments = useCallback(() => {
+  const loadDocuments = useCallback(async () => {
     setIsLoadingDocs(true);
-    // In a real app, this would fetch from a database
-    // For now, we use sample data and session storage
-    const storedDocs = JSON.parse(sessionStorage.getItem('documents') || 'null');
-    const allDocs = storedDocs ? storedDocs : [...sampleDocuments];
-    setDocuments(allDocs);
+    try {
+      const fetchedDocs = await getDocuments();
+      setDocuments(fetchedDocs);
 
-    if (allDocs.length > 0) {
-        // Check if there's a recently uploaded file or pasted text
-      const uploadedFileRaw = sessionStorage.getItem('uploadedFile');
-      const pastedText = sessionStorage.getItem('pastedText');
-
-      let newDoc: Document | null = null;
-      if (uploadedFileRaw) {
-        const uploadedFile = JSON.parse(uploadedFileRaw);
-        newDoc = {
-          id: `doc_${Date.now()}`,
-          name: uploadedFile.name,
-          type: 'contract',
-          content: uploadedFile.content,
-          createdAt: new Date().toISOString(),
-        };
-        sessionStorage.removeItem('uploadedFile');
-      } else if (pastedText) {
-        newDoc = {
-          id: `doc_${Date.now()}`,
-          name: `Pasted Document ${new Date().toLocaleDateString()}`,
-          type: 'contract',
-          content: pastedText,
-          createdAt: new Date().toISOString(),
-        };
-        sessionStorage.removeItem('pastedText');
-      }
-      
-      if (newDoc) {
-        const updatedDocs = [newDoc, ...allDocs];
-        setDocuments(updatedDocs);
-        setSelectedDoc(newDoc);
-        sessionStorage.setItem('documents', JSON.stringify(updatedDocs));
-      } else if (!selectedDoc || !allDocs.some(d => d.id === selectedDoc.id)) {
-        setSelectedDoc(allDocs[0]);
-      }
-    } else {
+      const newDocId = searchParams.get('docId');
+      if (newDocId) {
+        const newDoc = fetchedDocs.find(doc => doc.id === newDocId);
+        if (newDoc) {
+          setSelectedDoc(newDoc);
+        }
+      } else if (fetchedDocs.length > 0 && (!selectedDoc || !fetchedDocs.some(d => d.id === selectedDoc.id))) {
+        setSelectedDoc(fetchedDocs[0]);
+      } else if (fetchedDocs.length === 0) {
         setSelectedDoc(null);
+      }
+    } catch (error) {
+      console.error("Failed to load documents:", error);
+      toast({
+        title: "Error Loading Documents",
+        description: "Could not fetch documents from the database.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDocs(false);
     }
-    
-    setIsLoadingDocs(false);
-  }, [selectedDoc]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, toast]);
 
   useEffect(() => {
     loadDocuments();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadDocuments]);
 
 
   const handleTextSelection = useCallback(() => {
@@ -221,48 +203,61 @@ export function Dashboard() {
   };
 
   const handleDeleteDocument = async (docId: string) => {
-    const updatedDocs = documents.filter(doc => doc.id !== docId);
-    setDocuments(updatedDocs);
-    sessionStorage.setItem('documents', JSON.stringify(updatedDocs));
+    try {
+      await deleteDocument(docId);
+      const updatedDocs = documents.filter(doc => doc.id !== docId);
+      setDocuments(updatedDocs);
 
-    if (selectedDoc?.id === docId) {
-      setSelectedDoc(updatedDocs[0] || null);
+      if (selectedDoc?.id === docId) {
+        setSelectedDoc(updatedDocs[0] || null);
+      }
+      toast({
+          title: "Document Deleted",
+          description: "The document has been removed from the database.",
+      });
+    } catch (error) {
+      console.error("Failed to delete document:", error);
+      toast({
+        title: "Error Deleting Document",
+        variant: "destructive",
+      });
     }
-    toast({
-        title: "Document Deleted",
-        description: "The document has been removed.",
-    });
   };
 
   const handleFileUploadClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const text = e.target?.result as string;
-        const newDoc: Document = {
-            id: `doc_${Date.now()}`,
-            name: file.name,
-            type: 'contract',
-            content: text,
-            createdAt: new Date().toISOString(),
-        };
-        const updatedDocs = [newDoc, ...documents];
-        setDocuments(updatedDocs);
-        setSelectedDoc(newDoc);
-        sessionStorage.setItem('documents', JSON.stringify(updatedDocs));
-        toast({
-            title: "Document Uploaded",
-            description: `"${file.name}" has been successfully added.`,
-        });
+        try {
+          const newDocId = await addDocument({ name: file.name, content: text, type: 'contract' });
+          // After adding, reload all documents to get the new one from the DB
+          await loadDocuments();
+          
+          // Find and select the newly uploaded doc
+          const reloadedDocs = await getDocuments();
+          const newDoc = reloadedDocs.find(doc => doc.id === newDocId);
+          if (newDoc) {
+             setDocuments(reloadedDocs);
+             setSelectedDoc(newDoc);
+          }
+          
+          toast({
+              title: "Document Uploaded",
+              description: `"${file.name}" has been successfully added.`,
+          });
+        } catch (error) {
+          console.error("Failed to upload document:", error);
+          toast({ title: "Upload Failed", variant: "destructive"});
+        }
       };
       reader.readAsText(file);
     }
-    // Reset file input to allow uploading the same file again
     if (fileInputRef.current) {
         fileInputRef.current.value = '';
     }
@@ -425,7 +420,7 @@ export function Dashboard() {
                   <header className="flex items-center justify-between pb-4">
                     <div className="flex-1">
                       <h1 className="font-headline text-2xl font-bold">{selectedDoc.name}</h1>
-                      <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {new Date(selectedDoc.createdAt).toLocaleDateString()}</p>
+                      <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {new Date(selectedDoc.created_at).toLocaleDateString()}</p>
                     </div>
                     <div className='flex items-center gap-2'>
                       <ThemeToggle />
@@ -574,4 +569,12 @@ export function Dashboard() {
       </SidebarProvider>
     </>
   );
+}
+
+export function Dashboard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
+  )
 }
