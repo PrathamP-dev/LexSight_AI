@@ -1,17 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Conditionally create the client only if the credentials are provided
-const createSupabaseClient = () => {
+/**
+ * Creates a Supabase client if the required environment variables are available.
+ * This function is designed to be called on-demand to prevent startup crashes
+ * when environment variables are not set.
+ * @returns A Supabase client instance or null if credentials are not provided.
+ */
+export const getSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Ensure the variables are not empty strings before creating the client
   if (supabaseUrl && supabaseUrl.trim() !== '' && supabaseAnonKey && supabaseAnonKey.trim() !== '') {
     return createClient(supabaseUrl, supabaseAnonKey);
   }
   
-  // Return null if credentials are not available to prevent crashes
   return null; 
 };
-
-export const supabase = createSupabaseClient();
