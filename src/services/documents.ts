@@ -13,11 +13,18 @@ export type Document = {
 
 type NewDocument = Omit<Document, 'id' | 'created_at'>;
 
+function checkSupabaseClient() {
+  if (!supabase) {
+    throw new Error('Supabase client is not initialized. Please check your .env file for NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+  }
+}
+
 /**
  * Fetches all documents from the 'documents' table.
  */
 export async function getDocuments(): Promise<Document[]> {
-  const { data, error } = await supabase
+  checkSupabaseClient();
+  const { data, error } = await supabase!
     .from('documents')
     .select('*')
     .order('created_at', { ascending: false });
@@ -36,7 +43,8 @@ export async function getDocuments(): Promise<Document[]> {
  * @returns The id of the newly created document.
  */
 export async function addDocument(doc: NewDocument): Promise<string> {
-  const { data, error } = await supabase
+  checkSupabaseClient();
+  const { data, error } = await supabase!
     .from('documents')
     .insert([
       {
@@ -62,7 +70,8 @@ export async function addDocument(doc: NewDocument): Promise<string> {
  * @param id - The ID of the document to delete.
  */
 export async function deleteDocument(id: string): Promise<void> {
-  const { error } = await supabase.from('documents').delete().match({ id });
+  checkSupabaseClient();
+  const { error } = await supabase!.from('documents').delete().match({ id });
 
   if (error) {
     console.error('Error deleting document:', error);
