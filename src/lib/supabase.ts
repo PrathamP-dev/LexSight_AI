@@ -4,7 +4,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and/or anonymous key are not set in .env file.');
+  throw new Error('Supabase URL and/or anonymous key are not set. Please update your .env file with your Supabase project credentials.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
