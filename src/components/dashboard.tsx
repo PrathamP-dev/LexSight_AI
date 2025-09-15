@@ -37,7 +37,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Document, documents as initialDocuments } from '@/lib/data';
+import type { Document } from '@/services/documents';
+import { addDocument, deleteDocument, getDocuments } from '@/services/documents';
 import { handleSummarizeClause, handleAnalyzeRisk } from '@/lib/actions';
 import { LegalMindLogo } from './icons';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +63,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSearchParams } from 'next/navigation';
 
 
 const documentIcons = {
@@ -90,8 +92,9 @@ export function Dashboard() {
   const [isSummarizePending, startSummarizeTransition] = useTransition();
   const [isRiskPending, startRiskTransition] = useTransition();
   
-  const [documents, setDocuments] = useState<Document[]>(initialDocuments);
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(documents.length > 0 ? documents[0] : null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [isLoadingDocs, setIsLoadingDocs] = useState(true);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const [summary, setSummary] = useState('');
   const [riskAnalysis, setRiskAnalysis] = useState('');
@@ -99,51 +102,77 @@ export function Dashboard() {
   const textContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
-  const handleNewDocument = useCallback((doc: Document) => {
-    setDocuments(docs => [doc, ...docs]);
-    setSelectedDoc(doc);
-    // Reset analysis states
-    setSelectedText('');
-    setSummary('');
-    setRiskAnalysis('');
-    setActiveTab('summary');
-  }, []);
+  const loadDocuments = useCallback(async () => {
+    setIsLoadingDocs(true);
+    try {
+      const docs = await getDocuments();
+      setDocuments(docs);
+      if (!selectedDoc && docs.length > 0) {
+        setSelectedDoc(docs[0]);
+      } else if (docs.length === 0) {
+        setSelectedDoc(null);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      toast({ title: "Error", description: "Could not fetch documents from the database.", variant: "destructive" });
+    }
+    setIsLoadingDocs(false);
+  }, [selectedDoc, toast]);
 
   useEffect(() => {
-    const pastedText = sessionStorage.getItem('pastedText');
+    loadDocuments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleNewDocument = useCallback(async (docData: Omit<Document, 'id' | 'createdAt'>) => {
+    try {
+      const newDoc = await addDocument(docData);
+      await loadDocuments();
+      setSelectedDoc(newDoc);
+      // Reset analysis states
+      setSelectedText('');
+      setSummary('');
+      setRiskAnalysis('');
+      setActiveTab('summary');
+      return newDoc;
+    } catch (error) {
+      console.error("Error adding document:", error);
+      toast({ title: "Error", description: "Failed to save the new document.", variant: "destructive" });
+      return null;
+    }
+  }, [loadDocuments, toast]);
+
+  useEffect(() => {
+    const pastedText = searchParams.get('pastedText');
     if (pastedText) {
-      const newDoc: Document = {
-        id: `doc-${Date.now()}`,
-        name: 'Pasted Document',
+      handleNewDocument({
+        name: `Pasted Document ${new Date().toLocaleDateString()}`,
         type: 'contract',
         content: pastedText,
-        createdAt: new Date().toISOString().split('T')[0],
-      };
-      handleNewDocument(newDoc);
-      sessionStorage.removeItem('pastedText');
+      });
+      // Clear search params to avoid re-triggering
+      window.history.replaceState({}, '', '/dashboard');
       return; 
     }
 
-    const uploadedFileRaw = sessionStorage.getItem('uploadedFile');
+    const uploadedFileRaw = searchParams.get('uploadedFile');
     if (uploadedFileRaw) {
       try {
         const uploadedFile = JSON.parse(uploadedFileRaw);
-        const newDoc: Document = {
-          id: `doc-${Date.now()}`,
+        handleNewDocument({
           name: uploadedFile.name,
-          type: 'contract', 
+          type: 'contract',
           content: uploadedFile.content,
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        handleNewDocument(newDoc);
+        });
       } catch (e) {
-        console.error("Failed to parse uploaded file from session storage", e);
+        console.error("Failed to parse uploaded file from search params", e);
       } finally {
-        sessionStorage.removeItem('uploadedFile');
+        window.history.replaceState({}, '', '/dashboard');
       }
     }
-  }, [handleNewDocument]);
+  }, [searchParams, handleNewDocument]);
 
 
   const handleTextSelection = useCallback(() => {
@@ -209,19 +238,22 @@ export function Dashboard() {
     setActiveTab('summary');
   };
 
-  const deleteDocument = (docId: string) => {
-    setDocuments(docs => {
-        const newDocs = docs.filter(d => d.id !== docId);
+  const handleDeleteDocument = async (docId: string) => {
+    try {
+        await deleteDocument(docId);
+        toast({
+            title: "Document Deleted",
+            description: "The document has been successfully deleted.",
+        })
+        await loadDocuments();
         if (selectedDoc?.id === docId) {
-            const newSelectedDoc = newDocs.length > 0 ? newDocs[0] : null;
-            setSelectedDoc(newSelectedDoc);
+            const firstDoc = documents.length > 1 ? documents.find(d => d.id !== docId) : null;
+            setSelectedDoc(firstDoc || null);
         }
-        return newDocs;
-    });
-    toast({
-        title: "Document Deleted",
-        description: "The document has been successfully deleted.",
-    })
+    } catch (error) {
+        console.error("Error deleting document:", error);
+        toast({ title: "Error", description: "Failed to delete the document.", variant: "destructive" });
+    }
   };
 
   const handleFileUploadClick = () => {
@@ -232,20 +264,20 @@ export function Dashboard() {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const text = e.target?.result as string;
-        const newDoc: Document = {
-          id: `doc-${Date.now()}`,
+        const newDoc = await handleNewDocument({
           name: file.name,
           type: 'contract',
           content: text,
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        handleNewDocument(newDoc);
-        toast({
-            title: "Document Uploaded",
-            description: `"${file.name}" has been successfully added.`,
         });
+
+        if (newDoc) {
+          toast({
+              title: "Document Uploaded",
+              description: `"${file.name}" has been successfully added.`,
+          });
+        }
       };
       reader.readAsText(file);
     }
@@ -271,6 +303,7 @@ export function Dashboard() {
 
     if (summary) {
         reportContent += "--- Clause Summary ---\n";
+        reportContent += `Selected Clause: "${selectedText}"\n\n`;
         reportContent += `${summary}\n\n`;
     }
 
@@ -283,7 +316,7 @@ export function Dashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `LegalMind_Report_${selectedDoc?.name.replace(/ /g,"_")}.txt`;
+    link.download = `LegalMind_Report_${selectedDoc?.name.replace(/\s/g,"_")}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -311,39 +344,45 @@ export function Dashboard() {
             </SidebarHeader>
             <SidebarContent>
               <SidebarMenu>
-                {documents.map((doc) => (
-                  <SidebarMenuItem key={doc.id}>
-                    <SidebarMenuButton
-                      onClick={() => selectDocument(doc)}
-                      isActive={selectedDoc?.id === doc.id}
-                      tooltip={doc.name}
-                    >
-                      {documentIcons[doc.type]}
-                      <span>{doc.name}</span>
-                    </SidebarMenuButton>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <SidebarMenuAction showOnHover>
-                                <Trash2 />
-                            </SidebarMenuAction>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the document "{doc.name}".
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteDocument(doc.id)}>
-                                    Delete
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                  </SidebarMenuItem>
-                ))}
+                {isLoadingDocs ? (
+                  <div className="p-2">
+                    <Loader2 className="mx-auto size-6 animate-spin" />
+                  </div>
+                ) : (
+                  documents.map((doc) => (
+                    <SidebarMenuItem key={doc.id}>
+                      <SidebarMenuButton
+                        onClick={() => selectDocument(doc)}
+                        isActive={selectedDoc?.id === doc.id}
+                        tooltip={doc.name}
+                      >
+                        {documentIcons[doc.type]}
+                        <span>{doc.name}</span>
+                      </SidebarMenuButton>
+                      <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <SidebarMenuAction showOnHover>
+                                  <Trash2 />
+                              </SidebarMenuAction>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete the document "{doc.name}".
+                                  </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteDocument(doc.id)}>
+                                      Delete
+                                  </AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                    </SidebarMenuItem>
+                  ))
+                )}
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
@@ -404,7 +443,7 @@ export function Dashboard() {
                   <header className="flex items-center justify-between pb-4">
                     <div className="flex-1">
                       <h1 className="font-headline text-2xl font-bold">{selectedDoc.name}</h1>
-                      <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {selectedDoc.createdAt}</p>
+                      <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {new Date(selectedDoc.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div className='flex items-center gap-2'>
                       <ThemeToggle />
@@ -506,6 +545,7 @@ export function Dashboard() {
                                                   <Shield className="text-destructive"/>
                                                   <span>Risk Analysis Report</span>
                                                 </div>
+
                                               </CardTitle>
                                           </CardHeader>
                                           <CardContent>
@@ -528,17 +568,23 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center p-4">
-                <div className="flex items-center gap-4">
-                  <LegalMindLogo className="h-16 w-16 text-primary" />
-                  <h1 className="font-headline text-5xl font-bold">Welcome to LegalMind AI</h1>
-                </div>
-                <p className="max-w-md text-lg text-muted-foreground">
-                  Your AI-powered document assistant. Select a document from the sidebar to get started, or upload a new one.
-                </p>
-                <div className='flex items-center gap-2 mt-4'>
-                  <ThemeToggle />
-                  <SidebarTrigger className="md:hidden" />
-                </div>
+                {isLoadingDocs ? (
+                   <Loader2 className="h-16 w-16 animate-spin text-primary" />
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <LegalMindLogo className="h-16 w-16 text-primary" />
+                      <h1 className="font-headline text-5xl font-bold">Welcome to LegalMind AI</h1>
+                    </div>
+                    <p className="max-w-md text-lg text-muted-foreground">
+                      Your AI-powered document assistant. Upload a new document to get started.
+                    </p>
+                    <div className='flex items-center gap-2 mt-4'>
+                      <ThemeToggle />
+                      <SidebarTrigger className="md:hidden" />
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </SidebarInset>

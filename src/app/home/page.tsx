@@ -19,8 +19,7 @@ export default function HomePage() {
     event.preventDefault();
     const text = textAreaRef.current?.value;
     if (text) {
-      sessionStorage.setItem('pastedText', text);
-      router.push('/dashboard');
+      router.push(`/dashboard?pastedText=${encodeURIComponent(text)}`);
     }
   };
   
@@ -34,8 +33,8 @@ export default function HomePage() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
-        sessionStorage.setItem('uploadedFile', JSON.stringify({ name: file.name, content: text }));
-        router.push('/dashboard');
+        const fileInfo = { name: file.name, content: text };
+        router.push(`/dashboard?uploadedFile=${encodeURIComponent(JSON.stringify(fileInfo))}`);
       };
       reader.readAsText(file);
     }
