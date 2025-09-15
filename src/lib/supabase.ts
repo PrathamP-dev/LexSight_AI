@@ -6,7 +6,7 @@ const createSupabaseClient = () => {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // Ensure the variables are not empty strings before creating the client
-  if (supabaseUrl && supabaseUrl !== '' && supabaseAnonKey && supabaseAnonKey !== '') {
+  if (supabaseUrl && supabaseUrl.trim() !== '' && supabaseAnonKey && supabaseAnonKey.trim() !== '') {
     return createClient(supabaseUrl, supabaseAnonKey);
   }
   
