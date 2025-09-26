@@ -53,7 +53,7 @@ export async function addDocument(doc: NewDocument): Promise<string> {
   const supabase = checkSupabaseClient();
   
   // Sanitize content to prevent Unicode escape sequence errors
-  const sanitizedContent = doc.content.replace(/\\/g, '\\\\');
+  const sanitizedContent = doc.content.replace(/\\/g, '\\\\').replace(/\u0000/g, '');
 
   const { data, error } = await supabase
     .from('documents')
