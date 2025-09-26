@@ -7,7 +7,8 @@ import { revalidatePath } from 'next/cache';
 export type Document = {
   id: string;
   name: string;
-  type: 'contract' | 'report' | 'proposal';
+  // The 'type' column is optional as it might not exist in all schemas.
+  type?: 'contract' | 'report' | 'proposal';
   content: string;
   created_at: string; // ISO string format
 };
@@ -15,7 +16,6 @@ export type Document = {
 type NewDocument = {
   name: string;
   content: string;
-  // The 'type' is being removed from the insert operation
 };
 
 function checkSupabaseClient() {
@@ -51,14 +51,16 @@ export async function getDocuments(): Promise<Document[]> {
  */
 export async function addDocument(doc: NewDocument): Promise<string> {
   const supabase = checkSupabaseClient();
+  
+  // Sanitize content to prevent Unicode escape sequence errors
+  const sanitizedContent = doc.content.replace(/\\/g, '\\\\');
+
   const { data, error } = await supabase
     .from('documents')
     .insert([
       {
         name: doc.name,
-        content: doc.content,
-        // The 'type' column is no longer being inserted.
-        // It's assumed all new docs are contracts for now.
+        content: sanitizedContent,
       },
     ])
     .select('id')
@@ -83,7 +85,7 @@ export async function deleteDocument(id: string): Promise<void> {
 
   if (error) {
     console.error('Error deleting document:', error);
-    throw new Error('Could not delete document from the database.');
+    throw new Error(`Could not delete document from the database. Reason: ${error.message}`);
   }
 
   revalidatePath('/dashboard'); // Invalidate cache for the dashboard page
