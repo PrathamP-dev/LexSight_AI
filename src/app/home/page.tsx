@@ -23,7 +23,7 @@ export default function HomePage() {
   const handleCreateDocument = async (name: string, content: string) => {
     setIsProcessing(true);
     try {
-      const newDocId = await addDocument({ name, content, type: 'contract' });
+      const newDocId = await addDocument({ name, content });
       router.push(`/dashboard?docId=${newDocId}`);
     } catch (error) {
       console.error("Failed to create document:", error);
@@ -144,5 +144,3 @@ export default function HomePage() {
     </>
   );
 }
-
-    

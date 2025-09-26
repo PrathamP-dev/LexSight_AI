@@ -12,7 +12,11 @@ export type Document = {
   created_at: string; // ISO string format
 };
 
-type NewDocument = Omit<Document, 'id' | 'created_at'>;
+type NewDocument = {
+  name: string;
+  content: string;
+  // The 'type' is being removed from the insert operation
+};
 
 function checkSupabaseClient() {
   const supabase = getSupabaseClient();
@@ -34,7 +38,7 @@ export async function getDocuments(): Promise<Document[]> {
 
   if (error) {
     console.error('Error fetching documents:', error);
-    throw new Error('Could not fetch documents from the database.');
+    throw new Error(`Could not fetch documents from the database. Reason: ${error.message}`);
   }
 
   return data as Document[];
@@ -53,7 +57,8 @@ export async function addDocument(doc: NewDocument): Promise<string> {
       {
         name: doc.name,
         content: doc.content,
-        type: doc.type,
+        // The 'type' column is no longer being inserted.
+        // It's assumed all new docs are contracts for now.
       },
     ])
     .select('id')

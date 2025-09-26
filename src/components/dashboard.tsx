@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback, Suspense } from 'react';
@@ -72,13 +73,13 @@ const documentIcons = {
   contract: <FileText />,
   report: <FileBarChart2 />,
   proposal: <FilePlus2 />,
+  default: <FileText />,
 };
 
 const SQL_SCRIPT = `-- Create the documents table
 CREATE TABLE public.documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  type TEXT NOT NULL,
   content TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -114,22 +115,43 @@ function DatabaseSetupGuide({ error }: { error: string }) {
     });
   };
 
+  const isMissingTable = error.includes("Could not find the table 'public.documents'");
+  const isMissingColumn = error.includes("in the schema cache");
+
+  let title = "Database Configuration Required";
+  let description = "The application failed to connect to your `documents` table.";
+  let scriptToCopy = SQL_SCRIPT;
+  let fixInstruction = "To fix this, please run the following SQL script in your Supabase SQL Editor to create the 'documents' table:";
+
+  if (!isMissingTable && isMissingColumn) {
+    title = "Database Schema Mismatch";
+    description = "A column is missing from your 'documents' table.";
+    const missingColumnMatch = error.match(/Could not find the '([^']*)' column/);
+    const missingColumn = missingColumnMatch ? missingColumnMatch[1] : "required";
+    
+    // For now, the only optional column we removed was 'type'.
+    // If other errors show up, this logic might need to be expanded.
+    // The simplest fix is to recreate the table with the correct schema.
+    fixInstruction = `Your 'documents' table is missing one or more columns. The easiest way to fix this is to delete your existing 'documents' table from the Supabase dashboard and run the following script to recreate it with the correct schema:`;
+  }
+
+
   return (
     <div className="flex flex-1 items-center justify-center p-4 md:p-6">
        <Card className="w-full max-w-2xl bg-destructive/10 border-destructive">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 font-headline text-2xl text-destructive">
             <AlertTriangle className="size-8" />
-            Database Configuration Required
+            {title}
           </CardTitle>
           <CardDescription className="text-destructive/90">
-            The application failed to connect to your \`documents\` table. This is usually because the table hasn't been created in your Supabase project yet.
+            {description}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="mb-4">To fix this, please run the following SQL script in your Supabase SQL Editor:</p>
+          <p className="mb-4">{fixInstruction}</p>
           <div className="relative rounded-md bg-background p-4 font-mono text-sm">
-            <pre className="whitespace-pre-wrap break-all">{SQL_SCRIPT}</pre>
+            <pre className="whitespace-pre-wrap break-all">{scriptToCopy}</pre>
             <Button
               variant="ghost"
               size="icon"
@@ -140,7 +162,7 @@ function DatabaseSetupGuide({ error }: { error: string }) {
             </Button>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            <strong>Reason:</strong> {error}
+            <strong>Full Error:</strong> {error}
           </p>
         </CardContent>
        </Card>
@@ -203,7 +225,7 @@ function DashboardContent() {
     } catch (error) {
       console.error("Failed to load documents:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-      if (errorMessage.includes("Could not find the table 'public.documents'")) {
+      if (errorMessage.includes("schema cache")) {
         setDbError(errorMessage);
       } else {
         toast({
@@ -301,10 +323,16 @@ function DashboardContent() {
       });
     } catch (error) {
       console.error("Failed to delete document:", error);
-      toast({
-        title: "Error Deleting Document",
-        variant: "destructive",
-      });
+      const errorMessage = error instanceof Error ? error.message : "An unknown error has occurred.";
+       if (errorMessage.includes("schema cache")) {
+          setDbError(errorMessage);
+       } else {
+          toast({
+            title: "Error Deleting Document",
+            description: errorMessage,
+            variant: "destructive",
+          });
+       }
     }
   };
 
@@ -319,8 +347,13 @@ function DashboardContent() {
       reader.onload = async (e) => {
         const text = e.target?.result as string;
         try {
-          const newDocId = await addDocument({ name: file.name, content: text, type: 'contract' });
-          // After adding, reload all documents to get the new one from the DB
+          const newDocId = await addDocument({ name: file.name, content: text });
+          
+          toast({
+              title: "Document Uploaded",
+              description: `"${file.name}" has been successfully added. Reloading documents...`,
+          });
+          
           await loadDocuments();
           
           // Find and select the newly uploaded doc
@@ -330,18 +363,14 @@ function DashboardContent() {
              setDocuments(reloadedDocs);
              setSelectedDoc(newDoc);
           }
-          
-          toast({
-              title: "Document Uploaded",
-              description: `"${file.name}" has been successfully added.`,
-          });
         } catch (error) {
           console.error("Failed to upload document:", error);
           const errorMessage = error instanceof Error ? error.message : "An unknown error has occurred.";
-          if (errorMessage.includes("Could not find the table 'public.documents'")) {
+          if (errorMessage.includes("schema cache")) {
             setDbError(errorMessage);
+          } else {
+            toast({ title: "Upload Failed", description: errorMessage, variant: "destructive"});
           }
-          toast({ title: "Upload Failed", description: errorMessage, variant: "destructive"});
         }
       };
       reader.readAsText(file);
@@ -397,6 +426,8 @@ function DashboardContent() {
     return <DatabaseSetupGuide error={dbError} />;
   }
 
+  const isContract = selectedDoc?.type === 'contract' || selectedDoc?.type === undefined;
+
   return (
     <>
       <div className="dark-veil"></div>
@@ -425,7 +456,7 @@ function DashboardContent() {
                         isActive={selectedDoc?.id === doc.id}
                         tooltip={doc.name}
                       >
-                        {documentIcons[doc.type]}
+                        {documentIcons[doc.type] || documentIcons.default}
                         <span>{doc.name}</span>
                       </SidebarMenuButton>
                       <AlertDialog>
@@ -512,7 +543,9 @@ function DashboardContent() {
                   <header className="flex items-center justify-between pb-4">
                     <div className="flex-1">
                       <h1 className="font-headline text-2xl font-bold">{selectedDoc.name}</h1>
-                      <p className="text-sm text-muted-foreground">{selectedDoc.type} - Created on {new Date(selectedDoc.created_at).toLocaleDateString()}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Created on {new Date(selectedDoc.created_at).toLocaleDateString()}
+                      </p>
                     </div>
                     <div className='flex items-center gap-2'>
                       <ThemeToggle />
@@ -522,7 +555,7 @@ function DashboardContent() {
                   <Card className="flex-1 flex flex-col shadow-xl bg-card/80 backdrop-blur-sm border-primary/20">
                     <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="text-lg font-headline">Document Text</CardTitle>
-                      {selectedDoc.type === 'contract' && (
+                      {isContract && (
                           <Button size="sm" onClick={onAnalyzeRisk} disabled={isRiskPending}>
                               {isRiskPending ? (
                                   <Loader2 className="mr-2 size-4 animate-spin" />
@@ -556,7 +589,7 @@ function DashboardContent() {
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                           <TabsList className="m-4">
                               <TabsTrigger value="summary">Clause Summary</TabsTrigger>
-                              <TabsTrigger value="risk" disabled={selectedDoc.type !== 'contract'}>Risk Analysis</TabsTrigger>
+                              <TabsTrigger value="risk" disabled={!isContract}>Risk Analysis</TabsTrigger>
                           </TabsList>
                           <Separator />
                           <TabsContent value="summary" className="flex-1 m-0">
@@ -624,7 +657,7 @@ function DashboardContent() {
                                           </CardContent>
                                       </Card>
                                   )}
-                                  {!riskAnalysis && !isRiskPending && selectedDoc.type === 'contract' && (
+                                  {!riskAnalysis && !isRiskPending && isContract && (
                                       <div className="text-center text-muted-foreground mt-8">
                                           Click "Analyze for Risks" to generate a report for this contract.
                                       </div>
