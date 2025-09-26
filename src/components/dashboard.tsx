@@ -123,7 +123,7 @@ function DatabaseSetupGuide({ error }: { error: string }) {
             Database Configuration Required
           </CardTitle>
           <CardDescription className="text-destructive/90">
-            The application failed to connect to your `documents` table. This is usually because the table hasn't been created in your Supabase project yet.
+            The application failed to connect to your \`documents\` table. This is usually because the table hasn't been created in your Supabase project yet.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -670,5 +670,3 @@ export function Dashboard() {
     </Suspense>
   )
 }
-
-    
