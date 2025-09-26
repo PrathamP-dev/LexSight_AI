@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback, Suspense } from 'react';
@@ -18,6 +17,8 @@ import {
   User,
   LogOut,
   Plus,
+  AlertTriangle,
+  ClipboardCopy,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -73,6 +74,81 @@ const documentIcons = {
   proposal: <FilePlus2 />,
 };
 
+const SQL_SCRIPT = `-- Create the documents table
+CREATE TABLE public.documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
+
+-- Create a policy that allows anonymous users to read all documents
+CREATE POLICY "Enable read access for all users"
+ON public.documents
+FOR SELECT
+USING (true);
+
+-- Create a policy that allows anonymous users to insert new documents
+CREATE POLICY "Enable insert for anon users"
+ON public.documents
+FOR INSERT
+WITH CHECK (true);
+
+-- Create a policy that allows anonymous users to delete documents
+CREATE POLICY "Enable delete for all users"
+ON public.documents
+FOR DELETE
+USING (true);`;
+
+function DatabaseSetupGuide({ error }: { error: string }) {
+  const { toast } = useToast();
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(SQL_SCRIPT);
+    toast({
+      title: "Copied to Clipboard",
+      description: "You can now paste the SQL script into your Supabase SQL Editor.",
+    });
+  };
+
+  return (
+    <div className="flex flex-1 items-center justify-center p-4 md:p-6">
+       <Card className="w-full max-w-2xl bg-destructive/10 border-destructive">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 font-headline text-2xl text-destructive">
+            <AlertTriangle className="size-8" />
+            Database Configuration Required
+          </CardTitle>
+          <CardDescription className="text-destructive/90">
+            The application failed to connect to your `documents` table. This is usually because the table hasn't been created in your Supabase project yet.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">To fix this, please run the following SQL script in your Supabase SQL Editor:</p>
+          <div className="relative rounded-md bg-background p-4 font-mono text-sm">
+            <pre className="whitespace-pre-wrap break-all">{SQL_SCRIPT}</pre>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 h-7 w-7"
+              onClick={copyToClipboard}
+            >
+              <ClipboardCopy className="size-4" />
+            </Button>
+          </div>
+          <p className="mt-4 text-sm text-muted-foreground">
+            <strong>Reason:</strong> {error}
+          </p>
+        </CardContent>
+       </Card>
+    </div>
+  );
+}
+
+
 function ThemeToggle() {
     const { setTheme, theme } = useTheme();
     
@@ -95,6 +171,7 @@ function DashboardContent() {
   
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
+  const [dbError, setDbError] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const [summary, setSummary] = useState('');
@@ -107,6 +184,7 @@ function DashboardContent() {
 
   const loadDocuments = useCallback(async () => {
     setIsLoadingDocs(true);
+    setDbError(null);
     try {
       const fetchedDocs = await getDocuments();
       setDocuments(fetchedDocs);
@@ -124,11 +202,16 @@ function DashboardContent() {
       }
     } catch (error) {
       console.error("Failed to load documents:", error);
-      toast({
-        title: "Error Loading Documents",
-        description: "Could not fetch documents from the database.",
-        variant: "destructive",
-      });
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      if (errorMessage.includes("Could not find the table 'public.documents'")) {
+        setDbError(errorMessage);
+      } else {
+        toast({
+          title: "Error Loading Documents",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoadingDocs(false);
     }
@@ -254,7 +337,11 @@ function DashboardContent() {
           });
         } catch (error) {
           console.error("Failed to upload document:", error);
-          toast({ title: "Upload Failed", variant: "destructive"});
+          const errorMessage = error instanceof Error ? error.message : "An unknown error has occurred.";
+          if (errorMessage.includes("Could not find the table 'public.documents'")) {
+            setDbError(errorMessage);
+          }
+          toast({ title: "Upload Failed", description: errorMessage, variant: "destructive"});
         }
       };
       reader.readAsText(file);
@@ -305,6 +392,10 @@ function DashboardContent() {
         description: "The analysis report has been saved.",
     });
   };
+
+  if (dbError) {
+    return <DatabaseSetupGuide error={dbError} />;
+  }
 
   return (
     <>
@@ -579,3 +670,5 @@ export function Dashboard() {
     </Suspense>
   )
 }
+
+    
