@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { SparkleProvider } from '@/components/sparkle-provider';
 
 export const metadata: Metadata = {
-  title: 'LexiDoc',
+  title: 'LegalMind',
   description: 'AI-Powered Document Analysis for Legal Professionals',
 };
 

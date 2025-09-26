@@ -2,7 +2,7 @@
 import type { SVGProps } from "react";
 import { Gavel } from "lucide-react";
 
-export function LexiDocLogo(props: SVGProps<SVGSVGElement>) {
+export function LegalMindLogo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

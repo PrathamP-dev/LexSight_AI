@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LexiDocLogo } from '@/components/icons';
+import { LegalMindLogo } from '@/components/icons';
 
 const GoogleIcon = () => (
   <svg className="size-4" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -23,8 +23,8 @@ export default function LoginPage() {
         <Card className="mx-auto w-full max-w-sm shadow-xl border-2 border-primary/10 bg-card/80 backdrop-blur-sm">
           <CardHeader className="text-center">
             <Link href="/" className="flex justify-center items-center gap-3 mb-2">
-              <LexiDocLogo className="h-9 w-9 text-primary" />
-              <CardTitle className="font-headline text-4xl">LexiDoc</CardTitle>
+              <LegalMindLogo className="h-9 w-9 text-primary" />
+              <CardTitle className="font-headline text-4xl">LegalMind</CardTitle>
             </Link>
             <CardDescription>AI-Powered Document Analysis for Legal Professionals</CardDescription>
           </CardHeader>

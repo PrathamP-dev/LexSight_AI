@@ -8,11 +8,11 @@ import { motion } from 'framer-motion';
 import { DarkVeil } from '@/components/dark-veil';
 import { ShieldCheck, FileText, CheckCircle, Scale, Users, Bot, IndianRupee, Languages, Wand, CalendarClock, ArrowRight, BrainCircuit, Search, FileUp, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LexiDocLogo } from '@/components/icons';
+import { LegalMindLogo } from '@/components/icons';
 
 
 export default function LandingPage() {
-  const whyLexiDocPoints = [
+  const whyLegalMindPoints = [
     { text: "Contracts filled with confusing jargon", icon: <FileText className="size-6 text-accent" /> },
     { text: "Lawyers/consultants are expensive", icon: <IndianRupee className="size-6 text-accent" /> },
     { text: "Managing compliance deadlines is time-consuming", icon: <CalendarClock className="size-6 text-accent" /> },
@@ -79,8 +79,8 @@ export default function LandingPage() {
         <header className="absolute top-0 left-0 right-0 z-10 p-4">
           <div className="container mx-auto flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <LexiDocLogo className="size-8 text-primary" />
-              <h1 className="font-headline text-2xl font-bold">LexiDoc</h1>
+              <LegalMindLogo className="size-8 text-primary" />
+              <h1 className="font-headline text-2xl font-bold">LegalMind</h1>
             </Link>
             <Link href="/login">
               <Button variant="outline" className="font-headline">
@@ -98,9 +98,9 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
             >
               <div className="flex justify-center items-center gap-3">
-                <LexiDocLogo className="size-10 text-primary" />
+                <LegalMindLogo className="size-10 text-primary" />
                 <h2 className="font-headline text-4xl font-bold tracking-tighter md:text-6xl">
-                  LexiDoc
+                  LegalMind
                 </h2>
               </div>
               <p className="mt-2 font-headline text-2xl md:text-3xl text-primary/90">Your AI-Powered Legal Co-Pilot</p>
@@ -117,12 +117,12 @@ export default function LandingPage() {
           </div>
         </main>
         
-        {/* Why LexiDoc Section */}
+        {/* Why LegalMind Section */}
         <section className="py-16 md:py-24 bg-background/50">
             <div className="container mx-auto px-4 text-center">
                 <h3 className="font-headline text-3xl md:text-4xl font-bold">The Legal World is Complex.</h3>
                 <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-                    {whyLexiDocPoints.map((point, index) => (
+                    {whyLegalMindPoints.map((point, index) => (
                         <motion.div 
                             key={index}
                             initial={{ opacity: 0, y: 20 }}
@@ -139,7 +139,7 @@ export default function LandingPage() {
                 <div className="mt-12 max-w-3xl mx-auto">
                     <h4 className="font-headline text-2xl md:text-3xl font-bold text-primary">Our Vision</h4>
                     <p className="mt-4 text-muted-foreground text-base md:text-lg">
-                        LexiDoc bridges this gap by acting as your AI legal assistant, making legal and financial clarity accessible to everyone — from freelancers to startups, MSMEs, students, and everyday citizens.
+                        LegalMind bridges this gap by acting as your AI legal assistant, making legal and financial clarity accessible to everyone — from freelancers to startups, MSMEs, students, and everyday citizens.
                     </p>
                 </div>
             </div>

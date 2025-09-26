@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { UploadCloud, FileText, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { LexiDocLogo } from '@/components/icons';
+import { LegalMindLogo } from '@/components/icons';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { addDocument } from '@/services/documents';
@@ -68,8 +68,8 @@ export default function HomePage() {
         <header className="absolute top-0 left-0 right-0 p-4">
           <div className="container mx-auto flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <LexiDocLogo className="size-8 text-primary" />
-              <h1 className="font-headline text-2xl font-bold">LexiDoc</h1>
+              <LegalMindLogo className="size-8 text-primary" />
+              <h1 className="font-headline text-2xl font-bold">LegalMind</h1>
             </Link>
           </div>
         </header>
