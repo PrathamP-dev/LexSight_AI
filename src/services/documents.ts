@@ -1,3 +1,4 @@
+
 'use server';
 
 import { getSupabaseClient } from '@/lib/supabase';
@@ -59,8 +60,8 @@ export async function addDocument(doc: NewDocument): Promise<string> {
     .single();
 
   if (error) {
-    console.error('Error adding document:', error);
-    throw new Error('Could not add document to the database.');
+    console.error('Error adding document:', error.message);
+    throw new Error(`Could not add document to the database. Reason: ${error.message}`);
   }
 
   revalidatePath('/dashboard'); // Invalidate cache for the dashboard page
