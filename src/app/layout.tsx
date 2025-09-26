@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
@@ -6,7 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { SparkleProvider } from '@/components/sparkle-provider';
 
 export const metadata: Metadata = {
-  title: 'LegalMind AI',
+  title: 'LexiDoc',
   description: 'AI-Powered Document Analysis for Legal Professionals',
 };
 
