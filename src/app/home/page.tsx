@@ -27,10 +27,12 @@ export default function HomePage() {
       router.push(`/dashboard?docId=${newDocId}`);
     } catch (error) {
       console.error("Failed to create document:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
       toast({
         title: "Error Creating Document",
-        description: "There was a problem saving your document. Please try again.",
+        description: `There was a problem saving your document. Reason: ${errorMessage}`,
         variant: "destructive",
+        duration: 9000, // Give more time to read the error
       });
       setIsProcessing(false);
     }
