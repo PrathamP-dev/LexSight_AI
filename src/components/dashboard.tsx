@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback, Suspense } from 'react';
@@ -308,7 +309,7 @@ function DashboardContent() {
     });
   };
 
-  const isContract = selectedDoc?.type === 'contract' || selectedDoc?.type === undefined;
+  const isContract = selectedDoc?.type === 'contract' || !selectedDoc?.type;
 
   return (
     <>
@@ -317,12 +318,12 @@ function DashboardContent() {
         <div className="flex min-h-screen relative z-10">
           <Sidebar>
             <SidebarHeader>
-              <div className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 <LegalMindLogo className="size-7 text-primary" />
                 <h2 className="font-headline text-2xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
                   LegalMind
                 </h2>
-              </div>
+              </Link>
             </SidebarHeader>
             <SidebarContent>
               <SidebarMenu>
@@ -398,13 +399,17 @@ function DashboardContent() {
                     <DropdownMenuContent className="w-56 mb-2" side="top" align="start">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/profile">
                             <User className="mr-2" />
                             <span>Profile</span>
+                          </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/login">
                             <Plus className="mr-2" />
                             <span>Add Account</span>
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <Link href="/login">
