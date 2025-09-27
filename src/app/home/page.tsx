@@ -32,7 +32,7 @@ export default function HomePage() {
         title: "Error Creating Document",
         description: `There was a problem saving your document. Reason: ${errorMessage}`,
         variant: "destructive",
-        duration: 9000, // Give more time to read the error
+        duration: 9000,
       });
       setIsProcessing(false);
     }
@@ -99,14 +99,14 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-muted-foreground">
-                  Upload a file from your computer. Supported formats: PDF, DOCX, TXT.
+                  Upload a file from your computer. Supported formats: .txt
                 </p>
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
-                  accept=".pdf,.docx,.txt"
+                  accept=".txt"
                   disabled={isProcessing}
                 />
                 <Button onClick={handleFileUploadClick} className="w-full font-headline" disabled={isProcessing}>
