@@ -66,109 +66,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 
-const documentIcons = {
+const documentIcons: { [key: string]: React.ReactNode } = {
   contract: <FileText />,
   report: <FileBarChart2 />,
   proposal: <FilePlus2 />,
   default: <FileText />,
 };
-
-const SQL_SCRIPT = `-- Create the documents table
-CREATE TABLE public.documents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  content TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- Enable Row Level Security (RLS)
-ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
-
--- Create a policy that allows anonymous users to read all documents
-CREATE POLICY "Enable read access for all users"
-ON public.documents
-FOR SELECT
-USING (true);
-
--- Create a policy that allows anonymous users to insert new documents
-CREATE POLICY "Enable insert for anon users"
-ON public.documents
-FOR INSERT
-WITH CHECK (true);
-
--- Create a policy that allows anonymous users to delete documents
-CREATE POLICY "Enable delete for all users"
-ON public.documents
-FOR DELETE
-USING (true);`;
-
-function DatabaseSetupGuide({ error }: { error: string }) {
-  const { toast } = useToast();
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(SQL_SCRIPT);
-    toast({
-      title: "Copied to Clipboard",
-      description: "You can now paste the SQL script into your Supabase SQL Editor.",
-    });
-  };
-
-  const isMissingTable = error.includes("Could not find the table 'public.documents'");
-  const isMissingColumn = error.includes("in the schema cache");
-
-  let title = "Database Configuration Required";
-  let description = "The application failed to connect to your `documents` table.";
-  let scriptToCopy = SQL_SCRIPT;
-  let fixInstruction = "To fix this, please run the following SQL script in your Supabase SQL Editor to create the 'documents' table:";
-
-  if (!isMissingTable && isMissingColumn) {
-    title = "Database Schema Mismatch";
-    description = "A column is missing from your 'documents' table.";
-    const missingColumnMatch = error.match(/Could not find the '([^']*)' column/);
-    const missingColumn = missingColumnMatch ? missingColumnMatch[1] : "required";
-    
-    // For now, the only optional column we removed was 'type'.
-    // If other errors show up, this logic might need to be expanded.
-    // The simplest fix is to recreate the table with the correct schema.
-    fixInstruction = `Your 'documents' table is missing one or more columns. The easiest way to fix this is to delete your existing 'documents' table from the Supabase dashboard and run the following script to recreate it with the correct schema:`;
-  }
-
-
-  return (
-    <div className="flex flex-1 items-center justify-center p-4 md:p-6">
-       <Card className="w-full max-w-2xl bg-destructive/10 border-destructive">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-headline text-2xl text-destructive">
-            <AlertTriangle className="size-8" />
-            {title}
-          </CardTitle>
-          <CardDescription className="text-destructive/90">
-            {description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4">{fixInstruction}</p>
-          <div className="relative rounded-md bg-background p-4 font-mono text-sm">
-            <pre className="whitespace-pre-wrap break-all">{scriptToCopy}</pre>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 h-7 w-7"
-              onClick={copyToClipboard}
-            >
-              <ClipboardCopy className="size-4" />
-            </Button>
-          </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            <strong>Full Error:</strong> {error}
-          </p>
-        </CardContent>
-       </Card>
-    </div>
-  );
-}
 
 
 function ThemeToggle() {
@@ -193,7 +99,6 @@ function DashboardContent() {
   
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
-  const [dbError, setDbError] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const [summary, setSummary] = useState('');
@@ -203,10 +108,11 @@ function DashboardContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
+
 
   const loadDocuments = useCallback(async () => {
     setIsLoadingDocs(true);
-    setDbError(null);
     try {
       const fetchedDocs = await getDocuments();
       setDocuments(fetchedDocs);
@@ -225,15 +131,11 @@ function DashboardContent() {
     } catch (error) {
       console.error("Failed to load documents:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-      if (errorMessage.includes("schema cache")) {
-        setDbError(errorMessage);
-      } else {
         toast({
           title: "Error Loading Documents",
           description: errorMessage,
           variant: "destructive",
         });
-      }
     } finally {
       setIsLoadingDocs(false);
     }
@@ -319,20 +221,16 @@ function DashboardContent() {
       }
       toast({
           title: "Document Deleted",
-          description: "The document has been removed from the database.",
+          description: "The document has been removed.",
       });
     } catch (error) {
       console.error("Failed to delete document:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error has occurred.";
-       if (errorMessage.includes("schema cache")) {
-          setDbError(errorMessage);
-       } else {
-          toast({
-            title: "Error Deleting Document",
-            description: errorMessage,
-            variant: "destructive",
-          });
-       }
+       toast({
+        title: "Error Deleting Document",
+        description: errorMessage,
+        variant: "destructive",
+      });
     }
   };
 
@@ -347,30 +245,18 @@ function DashboardContent() {
       reader.onload = async (e) => {
         const text = e.target?.result as string;
         try {
-          const newDocId = await addDocument({ name: file.name, content: text });
-          
+          const newDocId = await addDocument({ name: file.name, content: text, type: 'contract' });
+          router.push(`/dashboard?docId=${newDocId}`);
+          await loadDocuments();
+
           toast({
               title: "Document Uploaded",
-              description: `"${file.name}" has been successfully added. Reloading documents...`,
+              description: `"${file.name}" has been successfully added.`,
           });
-          
-          await loadDocuments();
-          
-          // Find and select the newly uploaded doc
-          const reloadedDocs = await getDocuments();
-          const newDoc = reloadedDocs.find(doc => doc.id === newDocId);
-          if (newDoc) {
-             setDocuments(reloadedDocs);
-             setSelectedDoc(newDoc);
-          }
         } catch (error) {
           console.error("Failed to upload document:", error);
           const errorMessage = error instanceof Error ? error.message : "An unknown error has occurred.";
-          if (errorMessage.includes("schema cache")) {
-            setDbError(errorMessage);
-          } else {
-            toast({ title: "Upload Failed", description: errorMessage, variant: "destructive"});
-          }
+          toast({ title: "Upload Failed", description: errorMessage, variant: "destructive"});
         }
       };
       reader.readAsText(file);
@@ -421,10 +307,6 @@ function DashboardContent() {
         description: "The analysis report has been saved.",
     });
   };
-
-  if (dbError) {
-    return <DatabaseSetupGuide error={dbError} />;
-  }
 
   const isContract = selectedDoc?.type === 'contract' || selectedDoc?.type === undefined;
 
