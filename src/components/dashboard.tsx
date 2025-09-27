@@ -21,6 +21,7 @@ import {
   Plus,
   AlertTriangle,
   ClipboardCopy,
+  PlusSquare,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -59,6 +60,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Textarea } from '@/components/ui/textarea';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -94,6 +105,91 @@ function ThemeToggle() {
     )
 }
 
+function NewDocumentDialog({ onDocumentAdded }: { onDocumentAdded: (docId: string) => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const { toast } = useToast();
+
+  const handleCreateDocument = async (name: string, content: string) => {
+    setIsProcessing(true);
+    try {
+      const newDocId = await addDocument({ name, content, type: 'contract' });
+      toast({
+        title: "Document Created",
+        description: `"${name}" has been successfully added.`,
+      });
+      onDocumentAdded(newDocId);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Failed to create document:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      toast({
+        title: "Error Creating Document",
+        description: `There was a problem saving your document. Reason: ${errorMessage}`,
+        variant: "destructive",
+        duration: 9000,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleTextSubmit = async () => {
+    const text = textAreaRef.current?.value;
+    if (text) {
+      const docName = `Pasted Document ${new Date().toLocaleDateString()}`;
+      await handleCreateDocument(docName, text);
+    } else {
+      toast({
+        title: "No Text Provided",
+        description: "Please paste some text to create a document.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="group-data-[collapsible=expanded]:w-auto group-data-[collapsible=expanded]:px-2">
+            <PlusSquare />
+            <span className="ml-2 group-data-[collapsible=icon]:hidden">New</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[625px]">
+        <DialogHeader>
+          <DialogTitle>New Document from Text</DialogTitle>
+          <DialogDescription>
+            Paste your document content below. A new document will be created in your workspace.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <Textarea
+            ref={textAreaRef}
+            placeholder="Paste your contract text here..."
+            className="h-64"
+            disabled={isProcessing}
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isProcessing}>
+            Cancel
+          </Button>
+          <Button onClick={handleTextSubmit} disabled={isProcessing}>
+            {isProcessing ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              "Create Document"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 function DashboardContent() {
   const [isSummarizePending, startSummarizeTransition] = useTransition();
   const [isRiskPending, startRiskTransition] = useTransition();
@@ -124,6 +220,11 @@ function DashboardContent() {
         if (newDoc) {
           setSelectedDoc(newDoc);
         }
+         // Clean up the URL
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('docId');
+        router.replace(newUrl.toString(), { scroll: false });
+
       } else if (fetchedDocs.length > 0 && (!selectedDoc || !fetchedDocs.some(d => d.id === selectedDoc.id))) {
         setSelectedDoc(fetchedDocs[0]);
       } else if (fetchedDocs.length === 0) {
@@ -309,6 +410,14 @@ function DashboardContent() {
     });
   };
 
+  const handleDocumentAdded = async (docId: string) => {
+    await loadDocuments();
+    const newDoc = (await getDocuments()).find(doc => doc.id === docId);
+    if (newDoc) {
+      setSelectedDoc(newDoc);
+    }
+  }
+
   const isContract = selectedDoc?.type === 'contract' || !selectedDoc?.type;
 
   return (
@@ -376,10 +485,14 @@ function DashboardContent() {
                   className="hidden"
                   accept=".pdf,.docx,.txt"
               />
-              <Button variant="default" className="w-full mb-2" onClick={handleFileUploadClick}>
-                <Upload className="mr-2 size-4" />
-                <span className="group-data-[collapsible=icon]:hidden">Upload Document</span>
-              </Button>
+              <div className="flex items-center gap-2 w-full mb-2">
+                <Button variant="default" className="w-full" onClick={handleFileUploadClick}>
+                  <Upload className="mr-2 size-4" />
+                  <span className="group-data-[collapsible=icon]:hidden">Upload</span>
+                </Button>
+                <NewDocumentDialog onDocumentAdded={handleDocumentAdded} />
+              </div>
+
               <SidebarSeparator />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
