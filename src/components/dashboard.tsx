@@ -486,7 +486,7 @@ function DashboardContent() {
                   accept=".pdf,.docx,.txt"
               />
               <div className="flex items-center gap-2 w-full mb-2">
-                <Button variant="default" className="w-full" onClick={handleFileUploadClick}>
+                <Button variant="default" className="w-full flex-1" onClick={handleFileUploadClick}>
                   <Upload className="mr-2 size-4" />
                   <span className="group-data-[collapsible=icon]:hidden">Upload</span>
                 </Button>
