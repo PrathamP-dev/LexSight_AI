@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SparkleProvider } from '@/components/sparkle-provider';
+import { PageTransition } from '@/components/page-transition';
 
 export const metadata: Metadata = {
   title: 'LegalMind',
@@ -31,7 +32,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SparkleProvider>
-            {children}
+            <PageTransition>{children}</PageTransition>
             <Toaster />
           </SparkleProvider>
         </ThemeProvider>
