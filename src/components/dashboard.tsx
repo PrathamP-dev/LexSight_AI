@@ -152,7 +152,7 @@ function NewDocumentDialog({ onDocumentAdded }: { onDocumentAdded: (docId: strin
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="group-data-[collapsible=expanded]:w-auto group-data-[collapsible=expanded]:px-2">
+        <Button variant="default" size="icon" className="group-data-[collapsible=expanded]:w-auto group-data-[collapsible=expanded]:px-3">
             <PlusSquare />
             <span className="ml-2 group-data-[collapsible=icon]:hidden">New</span>
         </Button>
@@ -486,7 +486,7 @@ function DashboardContent() {
                   accept=".pdf,.docx,.txt"
               />
               <div className="flex items-center gap-2 w-full mb-2">
-                <Button variant="default" className="w-full flex-1" onClick={handleFileUploadClick}>
+                <Button variant="default" className="flex-1" onClick={handleFileUploadClick}>
                   <Upload className="mr-2 size-4" />
                   <span className="group-data-[collapsible=icon]:hidden">Upload</span>
                 </Button>
