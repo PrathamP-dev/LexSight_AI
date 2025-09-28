@@ -32,7 +32,8 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Allow all hosts for Replit environment - Next.js 15 doesn't need allowedDevOrigins
+  // Allow all hosts for Replit environment
+  allowedDevOrigins: ['*']
 };
 
 export default nextConfig;
