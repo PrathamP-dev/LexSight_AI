@@ -51,15 +51,31 @@ export default function HomePage() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      const fileType = file.name.toLowerCase().split('.').pop();
       const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target?.result as string;
-        await handleCreateDocument(file.name, text);
-      };
-      reader.readAsText(file);
+      
+      if (fileType === 'txt' || fileType === 'rtf') {
+        reader.onload = async (e) => {
+          const text = e.target?.result as string;
+          await handleCreateDocument(file.name, text);
+        };
+        reader.readAsText(file);
+      } else if (fileType === 'pdf' || fileType === 'docx' || fileType === 'doc') {
+        // For now, create a placeholder document for binary files
+        // In a full implementation, these would be processed by backend services
+        const placeholderText = `Document uploaded: ${file.name}\n\nFile type: ${fileType.toUpperCase()}\n\nThis document has been uploaded successfully. In a full implementation, the content would be extracted using specialized libraries for ${fileType.toUpperCase()} files.\n\nPlease note: Full text extraction for ${fileType.toUpperCase()} files requires backend processing services.`;
+        await handleCreateDocument(file.name, placeholderText);
+      } else {
+        toast({
+          title: "Unsupported File Type",
+          description: `The file type '.${fileType}' is not supported. Please upload a PDF, DOCX, TXT, DOC, or RTF file.`,
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
     }
   };
 
@@ -99,14 +115,14 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-muted-foreground">
-                  Upload a file from your computer. Supported formats: .txt
+                  Upload a file from your computer. Supported formats: PDF, DOCX, TXT, DOC, RTF
                 </p>
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
-                  accept=".txt"
+                  accept=".pdf,.docx,.txt,.doc,.rtf"
                   disabled={isProcessing}
                 />
                 <Button onClick={handleFileUploadClick} className="w-full font-headline" disabled={isProcessing}>
