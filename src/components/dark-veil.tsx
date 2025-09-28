@@ -94,18 +94,26 @@ export function DarkVeil({
   resolutionScale = 1,
 }: DarkVeilProps) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const fallbackRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
     if(!ref.current) return;
     const canvas = ref.current;
     const parent = canvas.parentElement;
     if(!parent) return;
 
-    const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio, 2),
-      canvas,
-    });
+    try {
+      const renderer = new Renderer({
+        dpr: Math.min(window.devicePixelRatio, 2),
+        canvas,
+      });
 
-    const gl = renderer.gl;
+      const gl = renderer.gl;
+      
+      // Check if WebGL context is available
+      if (!gl) {
+        throw new Error('WebGL not supported');
+      }
     const geometry = new Triangle(gl);
 
     const program = new Program(gl, {
@@ -155,6 +163,18 @@ export function DarkVeil({
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
     };
+    } catch (error) {
+      console.warn('WebGL not supported, falling back to solid background:', error);
+      // Hide canvas and show fallback
+      if (ref.current) {
+        ref.current.style.display = 'none';
+      }
+      if (fallbackRef.current) {
+        fallbackRef.current.style.display = 'block';
+      }
+      // Return cleanup function for the catch block
+      return () => {};
+    }
   }, [
     hueShift,
     noiseIntensity,
@@ -164,15 +184,30 @@ export function DarkVeil({
     warpAmount,
     resolutionScale,
   ]);
+  
   return (
-    <canvas
-      ref={ref}
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "block"
-      }}
-    />
+    <>
+      <canvas
+        ref={ref}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "block"
+        }}
+      />
+      <div
+        ref={fallbackRef}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "none",
+          background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)",
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+      />
+    </>
   );
 }
 
