@@ -1,13 +1,14 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error(
-    'GEMINI_API_KEY is not set. Please set it in your .env file.'
-  );
-}
+// Check if Gemini API key is available
+const isAIEnabled = !!process.env.GEMINI_API_KEY;
 
-export const ai = genkit({
+// Only initialize AI if API key is present
+export const ai = isAIEnabled ? genkit({
   plugins: [googleAI({apiVersion: 'v1'})],
   model: 'googleai/gemini-1.5-flash',
-});
+}) : null;
+
+// Export flag to check AI availability
+export { isAIEnabled };

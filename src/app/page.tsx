@@ -76,26 +76,54 @@ export default function LandingPage() {
         />
       </div>
       <div className="relative min-h-screen w-full overflow-hidden">
-        <header className="absolute top-0 left-0 right-0 z-10 p-4">
+        <motion.header 
+          className="absolute top-0 left-0 right-0 z-10 p-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            type: "spring",
+            damping: 20,
+            stiffness: 120,
+            delay: 0.1
+          }}
+        >
           <div className="container mx-auto flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <LegalMindLogo className="size-8 text-primary" />
-              <h1 className="font-headline text-2xl font-bold">LegalMind</h1>
-            </Link>
-            <Link href="/login">
-              <Button variant="outline" className="font-headline">
-                Login / Sign Up
-              </Button>
-            </Link>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", damping: 15, stiffness: 200 }}
+            >
+              <Link href="/" className="flex items-center gap-2">
+                <LegalMindLogo className="size-8 text-primary transition-all duration-300 hover:scale-110" />
+                <h1 className="font-headline text-2xl font-bold">LegalMind</h1>
+              </Link>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", damping: 15, stiffness: 200 }}
+            >
+              <Link href="/login">
+                <Button variant="outline" className="font-headline transition-all duration-200 hover:shadow-md hover:shadow-primary/20">
+                  Login / Sign Up
+                </Button>
+              </Link>
+            </motion.div>
           </div>
-        </header>
+        </motion.header>
 
         <main className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 pt-24 pb-10 text-center md:pt-28">
            <div className="z-10 flex flex-col items-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              initial={{ opacity: 0, y: 24, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ 
+                type: "spring",
+                damping: 20,
+                stiffness: 100,
+                mass: 0.8,
+                delay: 0.2
+              }}
             >
               <div className="flex justify-center items-center gap-3">
                 <LegalMindLogo className="size-10 text-primary" />
@@ -107,12 +135,19 @@ export default function LandingPage() {
               <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
                 Simplify contracts, agreements, and compliance with AI. Understand your rights, flag risks, and manage legal documents in plain language — fast, affordable, and accessible.
               </p>
-              <Link href="/login" className="mt-8 inline-block">
-                <Button size="lg" className="font-headline text-lg group">
-                  Get Started Free
-                  <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
+              <motion.div 
+                className="mt-8 inline-block"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", damping: 15, stiffness: 200 }}
+              >
+                <Link href="/login">
+                  <Button size="lg" className="font-headline text-lg group transform transition-all duration-200 hover:shadow-lg hover:shadow-primary/25">
+                    Get Started Free
+                    <ArrowRight className="ml-2 size-5 transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110" />
+                  </Button>
+                </Link>
+              </motion.div>
             </motion.div>
           </div>
         </main>
@@ -125,11 +160,21 @@ export default function LandingPage() {
                     {whyLegalMindPoints.map((point, index) => (
                         <motion.div 
                             key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            whileHover={{ 
+                              y: -4, 
+                              scale: 1.05,
+                              transition: { type: "spring", damping: 12, stiffness: 200 }
+                            }}
+                            transition={{ 
+                              type: "spring",
+                              damping: 20,
+                              stiffness: 120,
+                              delay: index * 0.1 
+                            }}
                             viewport={{ once: true }}
-                            className="flex flex-col items-center gap-3"
+                            className="flex flex-col items-center gap-3 cursor-pointer"
                         >
                             {point.icon}
                             <p className="text-muted-foreground">{point.text}</p>
@@ -153,11 +198,26 @@ export default function LandingPage() {
                     {features.map((feature, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            whileHover={{ 
+                              y: -8, 
+                              scale: 1.02,
+                              rotateX: 5,
+                              transition: { type: "spring", damping: 15, stiffness: 200 }
+                            }}
+                            transition={{ 
+                              type: "spring",
+                              damping: 25,
+                              stiffness: 120,
+                              delay: index * 0.15 
+                            }}
                             viewport={{ once: true }}
-                            className="h-full rounded-lg star-border-card"
+                            className="h-full rounded-lg star-border-card transform-gpu"
+                            style={{
+                              transformStyle: "preserve-3d",
+                              perspective: 1000,
+                            }}
                         >
                             <div className="h-full p-6 text-left star-border-content glare-card">
                               <CardHeader className="p-0">
@@ -182,11 +242,21 @@ export default function LandingPage() {
                     {competitiveEdge.map((edge, index) => (
                         <motion.div 
                             key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            initial={{ opacity: 0, x: -30, scale: 0.9 }}
+                            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                            whileHover={{ 
+                              x: 4, 
+                              scale: 1.02,
+                              transition: { type: "spring", damping: 15, stiffness: 300 }
+                            }}
+                            transition={{ 
+                              type: "spring",
+                              damping: 20,
+                              stiffness: 120,
+                              delay: index * 0.1 
+                            }}
                             viewport={{ once: true }}
-                            className="flex items-start gap-4"
+                            className="flex items-start gap-4 cursor-pointer rounded-lg p-3 -m-3 hover:bg-background/30 transition-colors duration-200"
                         >
                             <div className="mt-1">{edge.icon}</div>
                             <div>
@@ -204,10 +274,27 @@ export default function LandingPage() {
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                     {trustElements.map((item, index) => (
-                        <div key={index} className="flex flex-col items-center gap-3 text-center">
+                        <motion.div 
+                            key={index} 
+                            initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            whileHover={{ 
+                              y: -2, 
+                              scale: 1.03,
+                              transition: { type: "spring", damping: 15, stiffness: 300 }
+                            }}
+                            transition={{ 
+                              type: "spring",
+                              damping: 20,
+                              stiffness: 120,
+                              delay: index * 0.1 
+                            }}
+                            viewport={{ once: true }}
+                            className="flex flex-col items-center gap-3 text-center cursor-pointer"
+                        >
                             {item.icon}
                             <span className="text-sm font-medium text-muted-foreground">{item.text}</span>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>
@@ -216,17 +303,55 @@ export default function LandingPage() {
         {/* Roadmap Teaser Section */}
         <section className="py-16 md:py-24 bg-background/50">
             <div className="container mx-auto px-4 text-center">
-                <h3 className="font-headline text-3xl md:text-4xl font-bold">Coming Soon</h3>
-                <Wand className="mx-auto my-4 h-10 w-10 text-primary" />
+                <motion.h3 
+                  className="font-headline text-3xl md:text-4xl font-bold"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ type: "spring", damping: 20, stiffness: 120 }}
+                  viewport={{ once: true }}
+                >
+                  Coming Soon
+                </motion.h3>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", damping: 15, stiffness: 200 }}
+                  viewport={{ once: true }}
+                >
+                  <Wand className="mx-auto my-4 h-10 w-10 text-primary" />
+                </motion.div>
                 <div className="mt-8 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
                     {roadmapItems.map((item, index) => (
                         <React.Fragment key={index}>
-                            <div className="text-center">
+                            <motion.div 
+                              className="text-center"
+                              initial={{ opacity: 0, y: 30 }}
+                              whileInView={{ opacity: 1, y: 0 }}
+                              whileHover={{ 
+                                y: -4, 
+                                scale: 1.02,
+                                transition: { type: "spring", damping: 15, stiffness: 200 }
+                              }}
+                              transition={{ 
+                                type: "spring",
+                                damping: 20,
+                                stiffness: 120,
+                                delay: index * 0.1 
+                              }}
+                              viewport={{ once: true }}
+                            >
                                 <h4 className="font-headline text-lg font-bold">{item.title}</h4>
                                 <p className="text-muted-foreground">{item.description}</p>
-                            </div>
+                            </motion.div>
                             {index < roadmapItems.length - 1 && (
-                                <div className="hidden md:block h-6 w-px bg-border"></div>
+                                <motion.div 
+                                  className="hidden md:block h-6 w-px bg-border"
+                                  initial={{ scaleY: 0 }}
+                                  whileInView={{ scaleY: 1 }}
+                                  transition={{ delay: 0.5, duration: 0.3 }}
+                                  viewport={{ once: true }}
+                                />
                             )}
                         </React.Fragment>
                     ))}
@@ -237,13 +362,36 @@ export default function LandingPage() {
         {/* Final CTA */}
         <section className="py-20 md:py-32 text-center">
             <div className="container mx-auto px-4">
-                 <h3 className="font-headline text-3xl md:text-4xl font-bold">Ready to simplify your legal journey?</h3>
-                 <Link href="/login" className="mt-8 inline-block">
-                    <Button size="lg" className="font-headline text-lg group">
-                        Sign Up Free
-                        <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                </Link>
+                 <motion.h3 
+                   className="font-headline text-3xl md:text-4xl font-bold"
+                   initial={{ opacity: 0, y: 30 }}
+                   whileInView={{ opacity: 1, y: 0 }}
+                   transition={{ type: "spring", damping: 20, stiffness: 120 }}
+                   viewport={{ once: true }}
+                 >
+                   Ready to simplify your legal journey?
+                 </motion.h3>
+                 <motion.div 
+                   className="mt-8 inline-block"
+                   initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                   transition={{ 
+                     type: "spring", 
+                     damping: 15, 
+                     stiffness: 200,
+                     delay: 0.2
+                   }}
+                   viewport={{ once: true }}
+                 >
+                   <Link href="/login">
+                      <Button size="lg" className="font-headline text-lg group transform transition-all duration-200 hover:shadow-xl hover:shadow-primary/30">
+                          Sign Up Free
+                          <ArrowRight className="ml-2 size-5 transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110" />
+                      </Button>
+                  </Link>
+                 </motion.div>
             </div>
         </section>
 

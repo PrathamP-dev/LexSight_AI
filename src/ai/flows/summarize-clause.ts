@@ -8,7 +8,7 @@
  * - SummarizeClauseOutput - The return type for the summarizeClause function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, isAIEnabled} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SummarizeClauseInputSchema = z.object({
@@ -22,10 +22,17 @@ const SummarizeClauseOutputSchema = z.object({
 export type SummarizeClauseOutput = z.infer<typeof SummarizeClauseOutputSchema>;
 
 export async function summarizeClause(input: SummarizeClauseInput): Promise<SummarizeClauseOutput> {
+  if (!isAIEnabled || !ai || !summarizeClauseFlow) {
+    // Return a placeholder response when AI is not available
+    return {
+      summary: "AI summarization is currently unavailable. Please configure GEMINI_API_KEY to enable AI features. For now, please review the clause manually."
+    };
+  }
   return summarizeClauseFlow(input);
 }
 
-const prompt = ai.definePrompt({
+// Only define AI flows if AI is enabled
+const prompt = isAIEnabled && ai ? ai.definePrompt({
   name: 'summarizeClausePrompt',
   input: {schema: SummarizeClauseInputSchema},
   output: {schema: SummarizeClauseOutputSchema},
@@ -34,16 +41,16 @@ const prompt = ai.definePrompt({
   Please provide a concise and easy-to-understand summary of the following clause:
 
   {{clauseText}}`,
-});
+}) : null;
 
-const summarizeClauseFlow = ai.defineFlow(
+const summarizeClauseFlow = isAIEnabled && ai ? ai.defineFlow(
   {
     name: 'summarizeClauseFlow',
     inputSchema: SummarizeClauseInputSchema,
     outputSchema: SummarizeClauseOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
-);
+) : null;
