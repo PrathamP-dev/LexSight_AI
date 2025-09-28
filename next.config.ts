@@ -18,6 +18,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Enable all hosts for Replit proxy support
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
