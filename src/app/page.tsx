@@ -133,7 +133,7 @@ export default function LandingPage() {
               </div>
               <p className="mt-2 font-headline text-2xl md:text-3xl text-primary/90">Your AI-Powered Legal Co-Pilot</p>
               <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
-                Simplify contracts, agreements, and compliance with AI. Understand your rights, flag risks, and manage legal documents in plain language — fast, affordable, and accessible.
+                Simplify contracts, agreements, and compliance with AI. Understand your rights, flag risks, and manage legal documents in native language — fast, affordable, and accessible.
               </p>
               <motion.div 
                 className="mt-8 inline-block"
