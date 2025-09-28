@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useEffect } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec2 } from "ogl";
+import './dark-veil.css';
 
 const vertex = `
 attribute vec2 position;
@@ -197,14 +198,9 @@ export function DarkVeil({
       />
       <div
         ref={fallbackRef}
+        className="darkveil-fallback"
         style={{
-          width: "100%",
-          height: "100%",
-          display: "none",
-          background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)",
-          position: "absolute",
-          top: 0,
-          left: 0,
+          display: "none"
         }}
       />
     </>

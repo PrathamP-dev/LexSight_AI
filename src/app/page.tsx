@@ -67,7 +67,7 @@ export default function LandingPage() {
     <>
       <div className="fixed top-0 left-0 w-full h-full -z-10">
         <DarkVeil
-          speed={0.5}
+          speed={3.0}
           hueShift={50}
           noiseIntensity={0}
           scanlineFrequency={0}
