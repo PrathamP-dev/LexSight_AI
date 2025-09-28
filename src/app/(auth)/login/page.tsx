@@ -26,7 +26,7 @@ export default function LoginPage() {
               <LegalMindLogo className="h-9 w-9 text-primary" />
               <CardTitle className="font-headline text-4xl">LegalMind</CardTitle>
             </Link>
-            <CardDescription>AI-Powered Document Analysis for Legal Professionals</CardDescription>
+            <CardDescription>Making Legal Documents Simple and Accessible for Everyone</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">

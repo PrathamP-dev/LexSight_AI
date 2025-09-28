@@ -9,7 +9,7 @@ import { PageTransition } from '@/components/page-transition';
 
 export const metadata: Metadata = {
   title: 'LegalMind',
-  description: 'AI-Powered Document Analysis for Legal Professionals',
+  description: 'Making Legal Documents Simple and Accessible for Everyone',
 };
 
 export default function RootLayout({
