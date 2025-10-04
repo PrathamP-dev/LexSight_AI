@@ -1,17 +1,22 @@
 import { cookies } from 'next/headers'
 import { getUserById } from './db'
+import { supabase } from './db'
 
 const SESSION_COOKIE_NAME = 'session_token'
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
 
-// Simple in-memory session storage (in production, use Redis or database)
-const sessions = new Map<string, { userId: string; expiresAt: number }>()
-
 export async function createSession(userId: string): Promise<string> {
   const sessionToken = crypto.randomUUID()
-  const expiresAt = Date.now() + SESSION_DURATION
+  const expiresAt = new Date(Date.now() + SESSION_DURATION)
   
-  sessions.set(sessionToken, { userId, expiresAt })
+  // Store session in database
+  await supabase
+    .from('sessions')
+    .insert({
+      session_token: sessionToken,
+      user_id: userId,
+      expires_at: expiresAt.toISOString(),
+    })
   
   // Set cookie
   const cookieStore = await cookies()
@@ -34,21 +39,33 @@ export async function getSession() {
     return null
   }
   
-  const session = sessions.get(sessionToken)
+  // Get session from database
+  const { data: session, error } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('session_token', sessionToken)
+    .single()
   
-  if (!session) {
+  if (error || !session) {
     return null
   }
   
-  if (Date.now() > session.expiresAt) {
-    sessions.delete(sessionToken)
+  // Check if session is expired
+  if (new Date(session.expires_at) < new Date()) {
+    await supabase
+      .from('sessions')
+      .delete()
+      .eq('session_token', sessionToken)
     return null
   }
   
-  const user = await getUserById(session.userId)
+  const user = await getUserById(session.user_id)
   
   if (!user) {
-    sessions.delete(sessionToken)
+    await supabase
+      .from('sessions')
+      .delete()
+      .eq('session_token', sessionToken)
     return null
   }
   
@@ -67,7 +84,10 @@ export async function deleteSession() {
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
   
   if (sessionToken) {
-    sessions.delete(sessionToken)
+    await supabase
+      .from('sessions')
+      .delete()
+      .eq('session_token', sessionToken)
   }
   
   cookieStore.delete(SESSION_COOKIE_NAME)
