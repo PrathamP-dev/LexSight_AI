@@ -170,7 +170,7 @@ export default function HomePage() {
                     <Button asChild variant="outline" className="w-full">
                       <Link href="/profile">
                         <Settings className="mr-2 h-4 w-4" />
-                        Edit Profile
+                        Profile Settings
                       </Link>
                     </Button>
                   </div>
@@ -285,35 +285,6 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Quick Actions */}
-              <Card className="border-primary/20 bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="font-headline text-xl">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <Button variant="outline" asChild className="justify-start">
-                      <Link href="/dashboard">
-                        <FileStack className="mr-2 h-4 w-4" />
-                        View All Documents
-                      </Link>
-                    </Button>
-                    <Button variant="outline" asChild className="justify-start">
-                      <Link href="/profile">
-                        <User className="mr-2 h-4 w-4" />
-                        Manage Profile
-                      </Link>
-                    </Button>
-                    <Button variant="outline" asChild className="justify-start">
-                      <Link href="/profile">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             </motion.div>
           </div>
         </main>
