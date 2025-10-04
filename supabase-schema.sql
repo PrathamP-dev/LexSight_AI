@@ -25,26 +25,17 @@ CREATE TABLE IF NOT EXISTS documents (
 CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
--- Enable Row Level Security
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
-
--- Policies for users table
-CREATE POLICY "Users can read own data" ON users
-  FOR SELECT USING (true);
-
-CREATE POLICY "Users can insert own data" ON users
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Users can update own data" ON users
-  FOR UPDATE USING (true);
-
--- Policies for documents table
-CREATE POLICY "Users can read own documents" ON documents
-  FOR SELECT USING (true);
-
-CREATE POLICY "Users can insert own documents" ON documents
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Users can delete own documents" ON documents
-  FOR DELETE USING (true);
+-- Note: This application uses custom session-based authentication (not Supabase Auth).
+-- Row Level Security is disabled because access control is enforced at the application 
+-- layer through session cookies and API route middleware.
+-- 
+-- IMPORTANT SECURITY NOTES:
+-- 1. The SUPABASE_ANON_KEY should be treated as a server-side secret
+-- 2. All database operations go through Next.js API routes that verify session tokens
+-- 3. The middleware (middleware.ts) protects routes and validates user sessions
+-- 4. Direct client-side database access is not used - all queries are server-side
+--
+-- For production use, consider:
+-- - Using Supabase's service role key instead of anon key
+-- - Implementing Supabase Auth for built-in RLS support
+-- - Or keeping RLS disabled with proper API-level access control (current approach)
