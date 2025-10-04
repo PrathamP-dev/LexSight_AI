@@ -32,8 +32,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Allow all hosts for Replit environment
-  allowedDevOrigins: ['*']
+  // Allow all dev origins for Replit proxy environment
+  allowedDevOrigins: [
+    '*.replit.dev',
+    '*.repl.co', 
+    'localhost:*',
+    '127.0.0.1:*'
+  ]
 };
 
 export default nextConfig;
