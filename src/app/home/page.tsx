@@ -13,7 +13,8 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { UploadCloud, FileText, ArrowRight, Loader2, User, Settings, LogOut, FileStack, Moon, Sun } from 'lucide-react';
+import { UploadCloud, FileText, ArrowRight, User, Settings, LogOut, FileStack, Moon, Sun } from 'lucide-react';
+import { LegalLoader } from '@/components/ui/legal-loader';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LegalMindLogo } from '@/components/icons';
@@ -293,7 +294,7 @@ export default function HomePage() {
                     >
                       {isProcessing ? (
                         <>
-                          <Loader2 className="mr-2 animate-spin" /> 
+                          <LegalLoader size="sm" className="mr-2" /> 
                           Processing...
                         </>
                       ) : (
@@ -332,7 +333,7 @@ export default function HomePage() {
                       >
                         {isProcessing ? (
                           <>
-                            <Loader2 className="mr-2 animate-spin" />
+                            <LegalLoader size="sm" className="mr-2" />
                             Processing...
                           </>
                         ) : (

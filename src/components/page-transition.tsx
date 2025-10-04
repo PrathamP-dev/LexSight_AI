@@ -2,6 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { LegalLoader } from '@/components/ui/legal-loader';
 
 // Optimized spring physics for faster, smooth animations
 const springTransition = {
@@ -43,24 +45,47 @@ const pageVariants = {
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={pathname}
-        variants={pageVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        style={{
-          // GPU acceleration for smoother performance
-          transform: "translateZ(0)",
-          backfaceVisibility: "hidden",
-          perspective: 1000,
-        }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <>
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          >
+            <LegalLoader size="lg" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={pathname}
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          style={{
+            // GPU acceleration for smoother performance
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+            perspective: 1000,
+          }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    </>
   );
 }
