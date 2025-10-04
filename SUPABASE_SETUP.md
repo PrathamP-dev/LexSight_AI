@@ -6,7 +6,7 @@ Your LegalMind application is now configured to use Supabase for persistent data
 
 1. **Open Supabase SQL Editor**
    - Go to [Supabase Dashboard](https://supabase.com/dashboard)
-   - Select your project: `wwmizwjumyfxmrbqcoms`
+   - Select your project
    - Click on "SQL Editor" in the left sidebar
 
 2. **Run the Schema Script**
@@ -17,15 +17,17 @@ Your LegalMind application is now configured to use Supabase for persistent data
 
 3. **Verify Tables Created**
    - Go to "Table Editor" in the Supabase dashboard
-   - You should see two tables:
+   - You should see three tables:
      - `users` - Stores user account information
      - `documents` - Stores uploaded documents
+     - `sessions` - Stores user login sessions (persistent across server restarts)
 
 ## What This Does
 
 The schema creates:
 - **Users table**: Stores user accounts with email, password (hashed), name, and profile image
 - **Documents table**: Stores user documents with proper foreign key relationships
+- **Sessions table**: Stores authentication sessions in the database (fixes login persistence issues)
 - **Indexes**: Optimizes database queries for better performance
 
 ## Security Model
