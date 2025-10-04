@@ -10,13 +10,47 @@ import { LegalMindLogo } from "@/components/icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { ArrowLeft, Camera, User, Lock, Bell } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ProfilePage() {
+    const { user, isLoading } = useAuth();
     const [avatarUrl, setAvatarUrl] = useState("https://github.com/shadcn.png");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
+
+    const userInitials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.[0].toUpperCase() || 'U';
+    const displayName = user?.name || user?.email?.split('@')[0] || 'User';
+    const [firstName, lastName] = user?.name ? user.name.split(' ') : ['', ''];
+    
+    // Update avatar when user data loads
+    useEffect(() => {
+        if (user?.image) {
+            setAvatarUrl(user.image);
+        }
+    }, [user?.image]);
+
+    if (isLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">Loading profile...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <p className="text-muted-foreground">Please log in to view your profile</p>
+                </div>
+            </div>
+        );
+    }
 
     const handleAvatarClick = () => {
         fileInputRef.current?.click();
@@ -84,8 +118,8 @@ export default function ProfilePage() {
                         <div className="flex flex-col items-center gap-4 mb-6">
                             <div className="relative group">
                                 <Avatar className="size-32 border-4 border-primary/20 transition-all group-hover:border-primary/40">
-                                    <AvatarImage src={avatarUrl} alt="User" />
-                                    <AvatarFallback className="bg-primary text-primary-foreground text-3xl">TU</AvatarFallback>
+                                    <AvatarImage src={avatarUrl} alt={displayName} />
+                                    <AvatarFallback className="bg-primary text-primary-foreground text-3xl">{userInitials}</AvatarFallback>
                                 </Avatar>
                                 <button
                                     onClick={handleAvatarClick}
@@ -102,8 +136,8 @@ export default function ProfilePage() {
                                 />
                             </div>
                             <div className="text-center">
-                                <h3 className="font-headline text-2xl font-bold">Test User</h3>
-                                <p className="text-sm text-muted-foreground">user@example.com</p>
+                                <h3 className="font-headline text-2xl font-bold">{displayName}</h3>
+                                <p className="text-sm text-muted-foreground">{user?.email}</p>
                             </div>
                         </div>
 
@@ -130,16 +164,16 @@ export default function ProfilePage() {
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <div className="space-y-2">
                                             <Label htmlFor="firstName">First Name</Label>
-                                            <Input id="firstName" defaultValue="Test" />
+                                            <Input id="firstName" defaultValue={firstName} />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="lastName">Last Name</Label>
-                                            <Input id="lastName" defaultValue="User" />
+                                            <Input id="lastName" defaultValue={lastName} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Email Address</Label>
-                                        <Input id="email" type="email" defaultValue="user@example.com" />
+                                        <Input id="email" type="email" defaultValue={user?.email} disabled />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="phone">Phone Number</Label>

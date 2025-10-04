@@ -79,6 +79,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 
 const documentIcons: { [key: string]: React.ReactNode } = {
@@ -206,6 +207,15 @@ function DashboardContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user, logout, isLoading: isAuthLoading } = useAuth();
+  
+  const userInitials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.[0].toUpperCase() || 'U';
+  const displayName = user?.name || user?.email?.split('@')[0] || 'User';
+  
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
 
   const loadDocuments = useCallback(async () => {
@@ -499,12 +509,12 @@ function DashboardContent() {
                          <Button variant="ghost" className="w-full justify-start h-auto p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:size-8">
                             <div className="flex items-center gap-3">
                                 <Avatar className="size-7">
-                                    <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-                                    <AvatarFallback>U</AvatarFallback>
+                                    <AvatarImage src={user?.image} alt={displayName} />
+                                    <AvatarFallback className="bg-primary text-primary-foreground">{userInitials}</AvatarFallback>
                                 </Avatar>
                                 <div className="text-left group-data-[collapsible=icon]:hidden">
-                                    <p className="text-sm font-medium">Test User</p>
-                                    <p className="text-xs text-muted-foreground">user@example.com</p>
+                                    <p className="text-sm font-medium">{displayName}</p>
+                                    <p className="text-xs text-muted-foreground">{user?.email}</p>
                                 </div>
                             </div>
                         </Button>
@@ -519,18 +529,16 @@ function DashboardContent() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href="/login">
+                          <Link href="/home">
                             <Plus className="mr-2" />
-                            <span>Add Account</span>
+                            <span>Home</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <Link href="/login">
-                            <DropdownMenuItem>
-                                <LogOut className="mr-2" />
-                                <span>Log out</span>
-                            </DropdownMenuItem>
-                        </Link>
+                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                            <LogOut className="mr-2" />
+                            <span>Log out</span>
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarFooter>

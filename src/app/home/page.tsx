@@ -13,31 +13,51 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { UploadCloud, FileText, ArrowRight, Loader2, User, Settings, LogOut, FileStack } from 'lucide-react';
+import { UploadCloud, FileText, ArrowRight, Loader2, User, Settings, LogOut, FileStack, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LegalMindLogo } from '@/components/icons';
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
-import { addDocument } from '@/services/documents';
+import { useRef, useState, useEffect } from 'react';
+import { addDocument, getDocuments } from '@/services/documents';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from 'next-themes';
 
 export default function HomePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [documentCount, setDocumentCount] = useState(0);
   const { toast } = useToast();
   const { user, logout, isLoading } = useAuth();
+  const { setTheme, theme } = useTheme();
 
   const userInitials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.[0].toUpperCase() || 'U';
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
+
+  useEffect(() => {
+    const loadDocumentCount = async () => {
+      try {
+        const docs = await getDocuments();
+        setDocumentCount(docs.length);
+      } catch (error) {
+        console.error('Failed to load document count:', error);
+      }
+    };
+    loadDocumentCount();
+  }, []);
 
   const handleCreateDocument = async (name: string, content: string) => {
     setIsProcessing(true);
     try {
       const newDocId = await addDocument({ name, content, type: 'contract' });
+      
+      // Update document count after successful upload
+      const docs = await getDocuments();
+      setDocumentCount(docs.length);
+      
       router.push(`/dashboard?docId=${newDocId}`);
     } catch (error) {
       console.error("Failed to create document:", error);
@@ -103,8 +123,19 @@ export default function HomePage() {
               <h1 className="font-headline text-2xl font-bold">LegalMind</h1>
             </Link>
             
-            {/* Account Dropdown */}
-            <DropdownMenu>
+            {/* Theme Toggle and Account Dropdown */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              >
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+              
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10 border-2 border-primary/20">
@@ -148,6 +179,7 @@ export default function HomePage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           </div>
         </header>
 
@@ -183,11 +215,11 @@ export default function HomePage() {
                   <div className="mt-6 space-y-3">
                     <div className="flex justify-between items-center p-3 rounded-lg bg-primary/5">
                       <span className="text-sm font-medium">Documents</span>
-                      <span className="text-sm font-bold text-primary">0</span>
+                      <span className="text-sm font-bold text-primary">{documentCount}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-lg bg-accent/10">
                       <span className="text-sm font-medium">Analyzed</span>
-                      <span className="text-sm font-bold text-accent">0</span>
+                      <span className="text-sm font-bold text-accent">{documentCount}</span>
                     </div>
                   </div>
                 </CardContent>
