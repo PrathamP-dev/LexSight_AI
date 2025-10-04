@@ -1,29 +1,29 @@
-import { auth } from "@/auth"
-import { NextResponse } from "next/server"
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth
-  const { pathname } = req.nextUrl
+export function middleware(request: NextRequest) {
+  const sessionToken = request.cookies.get('session_token')?.value
+  const { pathname } = request.nextUrl
 
   // Protected routes
   const protectedRoutes = ['/home', '/dashboard', '/profile']
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
 
-  // Redirect to login if accessing protected route while not logged in
-  if (isProtectedRoute && !isLoggedIn) {
-    const loginUrl = new URL('/login', req.url)
+  // Redirect to login if accessing protected route without session
+  if (isProtectedRoute && !sessionToken) {
+    const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Redirect to home if logged in user tries to access login page
-  if (pathname === '/login' && isLoggedIn) {
-    return NextResponse.redirect(new URL('/home', req.url))
+  // Redirect to home if logged in user tries to access login/signup
+  if ((pathname === '/login' || pathname === '/signup') && sessionToken) {
+    return NextResponse.redirect(new URL('/home', request.url))
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"]
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|_next/webpack-hmr).*)']
 }

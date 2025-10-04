@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createUserWithPassword, getUserByEmail } from '@/lib/db'
+import { getUserByEmail } from '@/lib/db'
 import { createSession } from '@/lib/auth'
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json()
+    const { email, password } = await request.json()
 
     if (!email || !password) {
       return NextResponse.json(
@@ -13,22 +14,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (password.length < 6) {
+    const user = await getUserByEmail(email)
+
+    if (!user || !user.password) {
       return NextResponse.json(
-        { error: 'Password must be at least 6 characters long' },
-        { status: 400 }
+        { error: 'Invalid credentials' },
+        { status: 401 }
       )
     }
 
-    const existingUser = await getUserByEmail(email)
-    if (existingUser) {
+    const passwordMatch = await bcrypt.compare(password, user.password)
+
+    if (!passwordMatch) {
       return NextResponse.json(
-        { error: 'User with this email already exists' },
-        { status: 400 }
+        { error: 'Invalid credentials' },
+        { status: 401 }
       )
     }
 
-    const user = await createUserWithPassword(email, password, name)
     await createSession(user.id)
 
     return NextResponse.json({
@@ -41,9 +44,9 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Signup error:', error)
+    console.error('Login error:', error)
     return NextResponse.json(
-      { error: 'Failed to create account' },
+      { error: 'Failed to log in' },
       { status: 500 }
     )
   }

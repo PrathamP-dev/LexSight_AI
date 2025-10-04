@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { addDocument } from '@/services/documents';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function HomePage() {
   const router = useRouter();
@@ -28,6 +29,10 @@ export default function HomePage() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { user, logout, isLoading } = useAuth();
+
+  const userInitials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user?.email?.[0].toUpperCase() || 'U';
+  const displayName = user?.name || user?.email?.split('@')[0] || 'User';
 
   const handleCreateDocument = async (name: string, content: string) => {
     setIsProcessing(true);
@@ -103,17 +108,17 @@ export default function HomePage() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10 border-2 border-primary/20">
-                    <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-                    <AvatarFallback className="bg-primary text-primary-foreground">TU</AvatarFallback>
+                    <AvatarImage src={user?.image} alt={displayName} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">{userInitials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Test User</p>
+                    <p className="text-sm font-medium leading-none">{displayName}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      user@example.com
+                      {user?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -137,7 +142,7 @@ export default function HomePage() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -160,12 +165,12 @@ export default function HomePage() {
                 <CardContent className="pt-6">
                   <div className="flex flex-col items-center space-y-4">
                     <Avatar className="h-24 w-24 border-4 border-primary/20">
-                      <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-2xl">TU</AvatarFallback>
+                      <AvatarImage src={user?.image} alt={displayName} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-2xl">{userInitials}</AvatarFallback>
                     </Avatar>
                     <div className="text-center space-y-1">
-                      <h3 className="font-headline text-xl font-bold">Test User</h3>
-                      <p className="text-sm text-muted-foreground">user@example.com</p>
+                      <h3 className="font-headline text-xl font-bold">{displayName}</h3>
+                      <p className="text-sm text-muted-foreground">{user?.email}</p>
                     </div>
                     <Button asChild variant="outline" className="w-full">
                       <Link href="/profile">

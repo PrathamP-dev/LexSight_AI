@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/auth';
+import { getSession } from '@/lib/auth';
 import { getDocumentsByUserId, createDocument as dbCreateDocument, deleteDocumentById, getDocumentById as dbGetDocumentById } from '@/lib/db';
 
 export type Document = {
@@ -8,7 +8,7 @@ export type Document = {
   name: string;
   type: 'contract' | 'report' | 'proposal';
   content: string;
-  created_at: string; // ISO string format
+  created_at: string;
 };
 
 type NewDocument = {
@@ -17,11 +17,8 @@ type NewDocument = {
   type: 'contract' | 'report' | 'proposal';
 };
 
-/**
- * Fetches all documents for the authenticated user.
- */
 export async function getDocuments(): Promise<Document[]> {
-  const session = await auth();
+  const session = await getSession();
   
   if (!session?.user?.id) {
     return [];
@@ -40,13 +37,8 @@ export async function getDocuments(): Promise<Document[]> {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
-/**
- * Adds a new document for the authenticated user.
- * @param doc - The document to add.
- * @returns The id of the newly created document.
- */
 export async function addDocument(doc: NewDocument): Promise<string> {
-  const session = await auth();
+  const session = await getSession();
   
   if (!session?.user?.id) {
     throw new Error('You must be logged in to add documents');
@@ -62,12 +54,8 @@ export async function addDocument(doc: NewDocument): Promise<string> {
   return newDocument.id;
 }
 
-/**
- * Deletes a document by its ID (only if it belongs to the authenticated user).
- * @param id - The ID of the document to delete.
- */
 export async function deleteDocument(id: string): Promise<void> {
-  const session = await auth();
+  const session = await getSession();
   
   if (!session?.user?.id) {
     throw new Error('You must be logged in to delete documents');

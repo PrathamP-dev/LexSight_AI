@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,38 +11,15 @@ import { LegalMindLogo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-const GoogleIcon = () => (
-  <svg className="size-4" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <title>Google</title>
-    <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.6 1.62-4.6 1.62-3.87 0-7-3.13-7-7s3.13-7 7-7c1.74 0 3.23.67 4.38 1.62l2.35-2.35C17.65 1.58 15.3.8 12.48.8 7.2.8 3.18 4.9 3.18 10.12s4.02 9.32 9.3 9.32c2.8 0 5.1-1 6.8-2.68 1.8-1.7 2.4-4.2 2.4-6.42 0-1.12-.12-2.2-.36-3.28H12.48z" />
-  </svg>
-);
-
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const callbackUrl = searchParams.get('callbackUrl') || '/home';
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsGoogleLoading(true);
-      await signIn('google', { callbackUrl });
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      toast({
-        title: 'Sign In Failed',
-        description: 'Failed to sign in with Google. Please try again.',
-        variant: 'destructive',
-      });
-      setIsGoogleLoading(false);
-    }
-  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,27 +35,30 @@ export default function LoginPage() {
 
     try {
       setIsLoading(true);
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (result?.error) {
-        toast({
-          title: 'Sign In Failed',
-          description: 'Invalid email or password. Please try again.',
-          variant: 'destructive',
-        });
-      } else {
-        router.push(callbackUrl);
-        router.refresh();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Sign in failed');
       }
+
+      toast({
+        title: 'Welcome Back!',
+        description: 'You have successfully signed in.',
+      });
+
+      router.push(callbackUrl);
+      router.refresh();
     } catch (error) {
       console.error('Sign-in error:', error);
       toast({
-        title: 'Error',
-        description: 'An unexpected error occurred. Please try again.',
+        title: 'Sign In Failed',
+        description: error instanceof Error ? error.message : 'Invalid email or password.',
         variant: 'destructive',
       });
     } finally {
@@ -100,71 +79,46 @@ export default function LoginPage() {
             <CardDescription>Sign in to your account</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
-              <Button
-                variant="outline"
-                className="w-full font-headline"
-                onClick={handleGoogleSignIn}
-                disabled={isGoogleLoading || isLoading}
-              >
-                {isGoogleLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <GoogleIcon />
-                )}
-                Sign in with Google
-              </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
+            <form onSubmit={handleEmailSignIn} className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  autoComplete="email"
+                />
               </div>
-              
-              <form onSubmit={handleEmailSignIn} className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading || isGoogleLoading}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading || isGoogleLoading}
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full font-headline"
-                  disabled={isLoading || isGoogleLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    'Sign In'
-                  )}
-                </Button>
-              </form>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full font-headline"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
 
               <div className="text-center text-sm text-muted-foreground">
                 Don't have an account?{' '}
@@ -172,7 +126,7 @@ export default function LoginPage() {
                   Sign up
                 </Link>
               </div>
-            </div>
+            </form>
           </CardContent>
         </Card>
       </div>
