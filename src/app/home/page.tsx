@@ -233,6 +233,16 @@ export default function HomePage() {
                       <span className="text-sm font-medium">Analyzed</span>
                       <span className="text-sm font-bold text-accent">{documentCount}</span>
                     </div>
+                    <Button 
+                      asChild 
+                      variant="outline" 
+                      className="w-full mt-4"
+                    >
+                      <Link href="/dashboard">
+                        <FileStack className="mr-2 h-4 w-4" />
+                        View All Documents
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
