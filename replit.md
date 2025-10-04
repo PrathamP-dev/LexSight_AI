@@ -14,24 +14,16 @@ LegalMind is a Next.js application that makes legal documents simple and accessi
 - Authentication system with secure password hashing
 
 ## Recent Changes
-- **2025-10-04**: Supabase Database Integration
-  - Integrated Supabase for persistent data storage
-  - Created database schema for users and documents tables
-  - Updated db.ts to use Supabase client instead of in-memory storage
-  - Stored Supabase credentials securely in environment variables
-  - Documents now persist across restarts and device changes
-  - Access control enforced at application layer via session-based authentication
-  - All database operations are server-side through authenticated API routes
-  - See SUPABASE_SETUP.md for database setup instructions
-
 - **2025-10-04**: Fresh GitHub import successfully configured for Replit
-  - Installed all npm dependencies (633 packages)
-  - Configured Next.js for Replit proxy environment with allowedDevOrigins
+  - Installed all npm dependencies (643 packages)
+  - Configured Next.js for Replit proxy environment (already had allowedDevOrigins)
   - Dev server running on port 5000 with host 0.0.0.0 (required for Replit)
-  - Updated deployment configuration for autoscale production
-  - Verified frontend displays correctly - landing page, auth flows working
+  - Configured deployment for autoscale production (npm run build -> npm start)
+  - Verified frontend displays correctly - landing page fully functional
   - WebGL 3D effects gracefully fallback to solid background in headless environments
   - All TypeScript and LSP errors resolved
+  - Application ready for use - needs Supabase credentials for database features
+  - AI features optional - work without GEMINI_API_KEY with graceful degradation
 
 ## Project Architecture
 - **Frontend**: Next.js 15 with React 18, TypeScript
@@ -57,11 +49,12 @@ LegalMind is a Next.js application that makes legal documents simple and accessi
 
 ## Database Setup
 - **Database**: Supabase PostgreSQL
-- **Required Secrets**: SUPABASE_URL, SUPABASE_ANON_KEY (already configured)
-- **Setup Instructions**: See SUPABASE_SETUP.md for table creation
-- **Tables**: users, documents
+- **Required Secrets**: SUPABASE_URL, SUPABASE_ANON_KEY (need to be configured)
+- **Setup Instructions**: See SUPABASE_SETUP.md for complete database setup
+- **Tables**: users, documents (schema provided in supabase-schema.sql)
 - **Security**: Application-layer access control via session authentication
 - **API Routes**: All database operations are server-side and session-protected
+- **Note**: App works without database but signup/login require Supabase setup
 
 ## Configuration Notes
 - Next.js configured with allowedDevOrigins for Replit proxy support
