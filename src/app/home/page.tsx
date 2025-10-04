@@ -4,7 +4,16 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { UploadCloud, FileText, ArrowRight, Loader2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { UploadCloud, FileText, ArrowRight, Loader2, User, Settings, LogOut, FileStack } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LegalMindLogo } from '@/components/icons';
@@ -64,8 +73,6 @@ export default function HomePage() {
         };
         reader.readAsText(file);
       } else if (fileType === 'pdf' || fileType === 'docx' || fileType === 'doc') {
-        // For now, create a placeholder document for binary files
-        // In a full implementation, these would be processed by backend services
         const placeholderText = `Document uploaded: ${file.name}\n\nFile type: ${fileType.toUpperCase()}\n\nThis document has been uploaded successfully. In a full implementation, the content would be extracted using specialized libraries for ${fileType.toUpperCase()} files.\n\nPlease note: Full text extraction for ${fileType.toUpperCase()} files requires backend processing services.`;
         await handleCreateDocument(file.name, placeholderText);
       } else {
@@ -82,80 +89,234 @@ export default function HomePage() {
   return (
     <>
       <div className="fixed top-0 left-0 w-full h-full -z-10 bg-background"></div>
-      <div className="relative flex min-h-screen flex-col items-center justify-center p-4">
-        <header className="absolute top-0 left-0 right-0 p-4">
-          <div className="container mx-auto flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
+      <div className="relative flex min-h-screen flex-col">
+        {/* Enhanced Header with Account Toggle */}
+        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <Link href="/" className="flex items-center gap-2 transition-all hover:opacity-80">
               <LegalMindLogo className="size-8 text-primary" />
               <h1 className="font-headline text-2xl font-bold">LegalMind</h1>
             </Link>
+            
+            {/* Account Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10 border-2 border-primary/20">
+                    <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                    <AvatarFallback className="bg-primary text-primary-foreground">TU</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">Test User</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      user@example.com
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard" className="cursor-pointer">
+                    <FileStack className="mr-2 h-4 w-4" />
+                    <span>My Documents</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-4xl space-y-8"
-        >
-          <div className="text-center">
-            <h2 className="font-headline text-4xl font-bold tracking-tight">Get Started</h2>
-            <p className="mt-2 text-lg text-muted-foreground">
-              How would you like to provide your document?
-            </p>
-          </div>
+        {/* Main Content Area */}
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Profile Section - Left Sidebar */}
+            <motion.aside
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="lg:col-span-3"
+            >
+              <Card className="border-primary/20 bg-card/80 backdrop-blur-sm">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center space-y-4">
+                    <Avatar className="h-24 w-24 border-4 border-primary/20">
+                      <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-2xl">TU</AvatarFallback>
+                    </Avatar>
+                    <div className="text-center space-y-1">
+                      <h3 className="font-headline text-xl font-bold">Test User</h3>
+                      <p className="text-sm text-muted-foreground">user@example.com</p>
+                    </div>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href="/profile">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Edit Profile
+                      </Link>
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-6 space-y-3">
+                    <div className="flex justify-between items-center p-3 rounded-lg bg-primary/5">
+                      <span className="text-sm font-medium">Documents</span>
+                      <span className="text-sm font-bold text-primary">0</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 rounded-lg bg-accent/10">
+                      <span className="text-sm font-medium">Analyzed</span>
+                      <span className="text-sm font-bold text-accent">0</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.aside>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            <Card className="flex flex-col justify-between border-primary/20 bg-card/80 backdrop-blur-sm transition-all hover:border-primary/40 hover:scale-[1.02]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 font-headline text-2xl">
-                  <UploadCloud className="size-8 text-accent" />
-                  Upload a Document
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
-                  Upload a file from your computer. Supported formats: PDF, DOCX, TXT, DOC, RTF
+            {/* Main Document Upload Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="lg:col-span-9 space-y-6"
+            >
+              <div className="space-y-2">
+                <h2 className="font-headline text-3xl font-bold tracking-tight">Welcome Back!</h2>
+                <p className="text-lg text-muted-foreground">
+                  Start analyzing your legal documents instantly
                 </p>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="hidden"
-                  accept=".pdf,.docx,.txt,.doc,.rtf"
-                  disabled={isProcessing}
-                />
-                <Button onClick={handleFileUploadClick} className="w-full font-headline" disabled={isProcessing}>
-                  {isProcessing ? <Loader2 className="animate-spin" /> : 'Select File'}
-                </Button>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card className="flex flex-col justify-between border-primary/20 bg-card/80 backdrop-blur-sm transition-all hover:border-primary/40 hover:scale-[1.02]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 font-headline text-2xl">
-                  <FileText className="size-8 text-accent" />
-                  Paste Text
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleTextSubmit} className="flex flex-col gap-4">
-                  <Textarea ref={textAreaRef} placeholder="Paste your contract text here..." className="h-24" disabled={isProcessing} />
-                  <Button type="submit" className="w-full font-headline" disabled={isProcessing}>
-                    {isProcessing ? (
-                      <Loader2 className="animate-spin" />
-                    ) : (
-                      <>
-                        Analyze Text
-                        <ArrowRight className="ml-2 size-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="group border-primary/20 bg-card/80 backdrop-blur-sm transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 font-headline text-2xl">
+                      <div className="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        <UploadCloud className="size-6" />
+                      </div>
+                      Upload Document
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-6 text-muted-foreground">
+                      Upload a file from your computer. Supported formats: PDF, DOCX, TXT, DOC, RTF
+                    </p>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                      accept=".pdf,.docx,.txt,.doc,.rtf"
+                      disabled={isProcessing}
+                    />
+                    <Button 
+                      onClick={handleFileUploadClick} 
+                      className="w-full font-headline group" 
+                      disabled={isProcessing}
+                      size="lg"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="mr-2 animate-spin" /> 
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          Select File
+                          <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-primary/20 bg-card/80 backdrop-blur-sm transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 font-headline text-2xl">
+                      <div className="p-3 rounded-lg bg-accent/20 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                        <FileText className="size-6" />
+                      </div>
+                      Paste Text
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleTextSubmit} className="flex flex-col gap-4">
+                      <Textarea 
+                        ref={textAreaRef} 
+                        placeholder="Paste your contract text here..." 
+                        className="h-24 resize-none" 
+                        disabled={isProcessing} 
+                      />
+                      <Button 
+                        type="submit" 
+                        className="w-full font-headline group" 
+                        disabled={isProcessing}
+                        size="lg"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            Analyze Text
+                            <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions */}
+              <Card className="border-primary/20 bg-card/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Button variant="outline" asChild className="justify-start">
+                      <Link href="/dashboard">
+                        <FileStack className="mr-2 h-4 w-4" />
+                        View All Documents
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild className="justify-start">
+                      <Link href="/profile">
+                        <User className="mr-2 h-4 w-4" />
+                        Manage Profile
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild className="justify-start">
+                      <Link href="/profile">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
-        </motion.div>
+        </main>
       </div>
     </>
   );
