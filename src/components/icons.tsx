@@ -16,7 +16,10 @@ export function LegalMindLogo({ className = '', width = 32, height = 32 }: Legal
         alt="LegalMind Logo"
         width={width}
         height={height}
-        className="object-contain transition-transform duration-500 ease-out hover:animate-logo-wiggle"
+        className="object-contain transition-transform duration-500 ease-out hover:animate-logo-wiggle brightness-0 saturate-100"
+        style={{
+          filter: 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(148deg) brightness(91%) contrast(101%)'
+        }}
         priority
       />
     </div>
