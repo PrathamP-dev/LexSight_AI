@@ -95,10 +95,17 @@ export default {
             height: '0',
           },
         },
+        'logo-wiggle': {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '25%': { transform: 'rotate(-10deg) scale(1.1)' },
+          '50%': { transform: 'rotate(10deg) scale(1.1)' },
+          '75%': { transform: 'rotate(-5deg) scale(1.05)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'logo-wiggle': 'logo-wiggle 0.6s ease-in-out',
       },
     },
   },
