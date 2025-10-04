@@ -36,6 +36,7 @@ export async function getSession() {
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
   
   if (!sessionToken) {
+    console.log('[Auth] No session token in cookie')
     return null
   }
   
@@ -46,7 +47,13 @@ export async function getSession() {
     .eq('session_token', sessionToken)
     .single()
   
-  if (error || !session) {
+  if (error) {
+    console.error('[Auth] Error fetching session from database:', error)
+    return null
+  }
+  
+  if (!session) {
+    console.log('[Auth] No session found in database for token')
     return null
   }
   
