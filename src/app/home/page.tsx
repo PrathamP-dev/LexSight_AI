@@ -50,6 +50,7 @@ export default function HomePage() {
   }, []);
 
   const handleCreateDocument = async (name: string, content: string) => {
+    if (isProcessing) return; // Prevent multiple clicks
     setIsProcessing(true);
     try {
       const newDocId = await addDocument({ name, content, type: 'contract' });
@@ -57,6 +58,13 @@ export default function HomePage() {
       // Update document count after successful upload
       const docs = await getDocuments();
       setDocumentCount(docs.length);
+      
+      // Show success feedback before navigation
+      toast({
+        title: "Document Created",
+        description: "Redirecting to dashboard...",
+        duration: 2000,
+      });
       
       router.push(`/dashboard?docId=${newDocId}`);
     } catch (error) {
@@ -86,6 +94,8 @@ export default function HomePage() {
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (isProcessing) return; // Prevent multiple uploads
+    
     const file = event.target.files?.[0];
     if (file) {
       const fileType = file.name.toLowerCase().split('.').pop();
@@ -109,6 +119,8 @@ export default function HomePage() {
         });
       }
     }
+    // Reset input to allow re-uploading the same file
+    event.target.value = '';
   };
 
   return (
@@ -264,9 +276,10 @@ export default function HomePage() {
                     />
                     <Button 
                       onClick={handleFileUploadClick} 
-                      className="w-full font-headline group" 
+                      className="w-full font-headline group transition-all" 
                       disabled={isProcessing}
                       size="lg"
+                      style={{ cursor: isProcessing ? 'not-allowed' : 'pointer' }}
                     >
                       {isProcessing ? (
                         <>
@@ -302,9 +315,10 @@ export default function HomePage() {
                       />
                       <Button 
                         type="submit" 
-                        className="w-full font-headline group" 
+                        className="w-full font-headline group transition-all" 
                         disabled={isProcessing}
                         size="lg"
+                        style={{ cursor: isProcessing ? 'not-allowed' : 'pointer' }}
                       >
                         {isProcessing ? (
                           <>

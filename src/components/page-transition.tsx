@@ -3,19 +3,19 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
-// iOS-inspired spring physics for smooth, natural animations
+// Optimized spring physics for faster, smooth animations
 const springTransition = {
   type: "spring",
-  damping: 25,
-  stiffness: 120,
-  mass: 0.8,
+  damping: 30,
+  stiffness: 300,
+  mass: 0.5,
 };
 
 const pageVariants = {
   initial: { 
     opacity: 0, 
-    scale: 0.96,
-    y: 20,
+    scale: 0.98,
+    y: 10,
   },
   animate: { 
     opacity: 1, 
@@ -23,20 +23,20 @@ const pageVariants = {
     y: 0,
     transition: {
       ...springTransition,
-      staggerChildren: 0.08,
-      delayChildren: 0.05,
+      staggerChildren: 0.03,
+      delayChildren: 0.01,
     }
   },
   exit: { 
     opacity: 0, 
-    scale: 1.04,
-    y: -12,
+    scale: 1.02,
+    y: -8,
     transition: {
       type: "spring",
-      damping: 30,
-      stiffness: 200,
-      mass: 0.6,
-      duration: 0.15
+      damping: 35,
+      stiffness: 350,
+      mass: 0.4,
+      duration: 0.1
     }
   },
 };

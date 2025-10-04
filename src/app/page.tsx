@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -41,7 +40,7 @@ export default function LandingPage() {
       icon: <Search className="size-8 text-primary" />
     },
   ];
-  
+
   const competitiveEdge = [
     { title: 'Modular Design', description: 'Switch between free LLMs (Hugging Face, Groq) or premium ones (Gemini, OpenAI).', icon: <Bot className="size-6 text-primary" /> },
     { title: 'Multilingual Support', description: 'Regional languages included for wider accessibility.', icon: <Languages className="size-6 text-primary" /> },
@@ -76,11 +75,11 @@ export default function LandingPage() {
         />
       </div>
       <div className="relative min-h-screen w-full overflow-hidden">
-        <motion.header 
+        <motion.header
           className="absolute top-0 left-0 right-0 z-10 p-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ 
+          transition={{
             type: "spring",
             damping: 20,
             stiffness: 120,
@@ -115,14 +114,14 @@ export default function LandingPage() {
         <main className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 pt-24 pb-10 text-center md:pt-28">
            <div className="z-10 flex flex-col items-center">
             <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.95 }}
+              initial={{ opacity: 0, y: 16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ 
+              transition={{
                 type: "spring",
-                damping: 20,
-                stiffness: 100,
-                mass: 0.8,
-                delay: 0.2
+                damping: 25,
+                stiffness: 200,
+                mass: 0.6,
+                delay: 0.1
               }}
             >
               <div className="flex justify-center items-center gap-3">
@@ -135,7 +134,7 @@ export default function LandingPage() {
               <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
                 Simplify contracts, agreements, and compliance with AI. Understand your rights, flag risks, and manage legal documents in native language — fast, affordable, and accessible.
               </p>
-              <motion.div 
+              <motion.div
                 className="mt-8 inline-block"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -151,27 +150,27 @@ export default function LandingPage() {
             </motion.div>
           </div>
         </main>
-        
+
         {/* Why LegalMind Section */}
         <section className="py-16 md:py-24 bg-background/50">
             <div className="container mx-auto px-4 text-center">
                 <h3 className="font-headline text-3xl md:text-4xl font-bold">The Legal World is Complex.</h3>
                 <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8">
                     {whyLegalMindPoints.map((point, index) => (
-                        <motion.div 
+                        <motion.div
                             key={index}
                             initial={{ opacity: 0, y: 30, scale: 0.8 }}
                             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                            whileHover={{ 
-                              y: -4, 
+                            whileHover={{
+                              y: -4,
                               scale: 1.05,
                               transition: { type: "spring", damping: 12, stiffness: 200 }
                             }}
-                            transition={{ 
+                            transition={{
                               type: "spring",
-                              damping: 20,
-                              stiffness: 120,
-                              delay: index * 0.1 
+                              damping: 25,
+                              stiffness: 200,
+                              delay: index * 0.05
                             }}
                             viewport={{ once: true }}
                             className="flex flex-col items-center gap-3 cursor-pointer"
@@ -200,17 +199,17 @@ export default function LandingPage() {
                             key={index}
                             initial={{ opacity: 0, y: 40, scale: 0.9 }}
                             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                            whileHover={{ 
-                              y: -8, 
+                            whileHover={{
+                              y: -8,
                               scale: 1.02,
                               rotateX: 5,
                               transition: { type: "spring", damping: 15, stiffness: 200 }
                             }}
-                            transition={{ 
+                            transition={{
                               type: "spring",
                               damping: 25,
                               stiffness: 120,
-                              delay: index * 0.15 
+                              delay: index * 0.15
                             }}
                             viewport={{ once: true }}
                             className="h-full rounded-lg star-border-card transform-gpu"
@@ -240,20 +239,20 @@ export default function LandingPage() {
                 <h3 className="text-center font-headline text-3xl md:text-4xl font-bold">Competitive Edge</h3>
                 <div className="mt-12 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                     {competitiveEdge.map((edge, index) => (
-                        <motion.div 
+                        <motion.div
                             key={index}
                             initial={{ opacity: 0, x: -30, scale: 0.9 }}
                             whileInView={{ opacity: 1, x: 0, scale: 1 }}
-                            whileHover={{ 
-                              x: 4, 
+                            whileHover={{
+                              x: 4,
                               scale: 1.02,
                               transition: { type: "spring", damping: 15, stiffness: 300 }
                             }}
-                            transition={{ 
+                            transition={{
                               type: "spring",
                               damping: 20,
                               stiffness: 120,
-                              delay: index * 0.1 
+                              delay: index * 0.1
                             }}
                             viewport={{ once: true }}
                             className="flex items-start gap-4 cursor-pointer rounded-lg p-3 -m-3 hover:bg-background/30 transition-colors duration-200"
@@ -268,26 +267,26 @@ export default function LandingPage() {
                 </div>
             </div>
         </section>
-        
+
         {/* Trust Elements Section */}
         <section className="py-16">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                     {trustElements.map((item, index) => (
-                        <motion.div 
-                            key={index} 
+                        <motion.div
+                            key={index}
                             initial={{ opacity: 0, y: 30, scale: 0.9 }}
                             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                            whileHover={{ 
-                              y: -2, 
+                            whileHover={{
+                              y: -2,
                               scale: 1.03,
                               transition: { type: "spring", damping: 15, stiffness: 300 }
                             }}
-                            transition={{ 
+                            transition={{
                               type: "spring",
                               damping: 20,
                               stiffness: 120,
-                              delay: index * 0.1 
+                              delay: index * 0.1
                             }}
                             viewport={{ once: true }}
                             className="flex flex-col items-center gap-3 text-center cursor-pointer"
@@ -303,7 +302,7 @@ export default function LandingPage() {
         {/* Roadmap Teaser Section */}
         <section className="py-16 md:py-24 bg-background/50">
             <div className="container mx-auto px-4 text-center">
-                <motion.h3 
+                <motion.h3
                   className="font-headline text-3xl md:text-4xl font-bold"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -324,20 +323,20 @@ export default function LandingPage() {
                 <div className="mt-8 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
                     {roadmapItems.map((item, index) => (
                         <React.Fragment key={index}>
-                            <motion.div 
+                            <motion.div
                               className="text-center"
                               initial={{ opacity: 0, y: 30 }}
                               whileInView={{ opacity: 1, y: 0 }}
-                              whileHover={{ 
-                                y: -4, 
+                              whileHover={{
+                                y: -4,
                                 scale: 1.02,
                                 transition: { type: "spring", damping: 15, stiffness: 200 }
                               }}
-                              transition={{ 
+                              transition={{
                                 type: "spring",
                                 damping: 20,
                                 stiffness: 120,
-                                delay: index * 0.1 
+                                delay: index * 0.1
                               }}
                               viewport={{ once: true }}
                             >
@@ -345,7 +344,7 @@ export default function LandingPage() {
                                 <p className="text-muted-foreground">{item.description}</p>
                             </motion.div>
                             {index < roadmapItems.length - 1 && (
-                                <motion.div 
+                                <motion.div
                                   className="hidden md:block h-6 w-px bg-border"
                                   initial={{ scaleY: 0 }}
                                   whileInView={{ scaleY: 1 }}
@@ -362,7 +361,7 @@ export default function LandingPage() {
         {/* Final CTA */}
         <section className="py-20 md:py-32 text-center">
             <div className="container mx-auto px-4">
-                 <motion.h3 
+                 <motion.h3
                    className="font-headline text-3xl md:text-4xl font-bold"
                    initial={{ opacity: 0, y: 30 }}
                    whileInView={{ opacity: 1, y: 0 }}
@@ -371,15 +370,15 @@ export default function LandingPage() {
                  >
                    Ready to simplify your legal journey?
                  </motion.h3>
-                 <motion.div 
+                 <motion.div
                    className="mt-8 inline-block"
                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
                    whileHover={{ scale: 1.05 }}
                    whileTap={{ scale: 0.95 }}
-                   transition={{ 
-                     type: "spring", 
-                     damping: 15, 
+                   transition={{
+                     type: "spring",
+                     damping: 15,
                      stiffness: 200,
                      delay: 0.2
                    }}
