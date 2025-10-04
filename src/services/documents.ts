@@ -45,7 +45,7 @@ export async function addDocument(doc: NewDocument): Promise<string> {
   }
 
   const newDocument = await dbCreateDocument({
-    userId: session.user.id,
+    user_id: session.user.id,
     name: doc.name,
     content: doc.content,
     type: doc.type,
@@ -63,7 +63,7 @@ export async function deleteDocument(id: string): Promise<void> {
 
   const doc = await dbGetDocumentById(id);
   
-  if (!doc || doc.userId !== session.user.id) {
+  if (!doc || doc.user_id !== session.user.id) {
     throw new Error('Document not found or you do not have permission to delete it');
   }
 
