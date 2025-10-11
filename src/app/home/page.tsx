@@ -99,29 +99,50 @@ export default function HomePage() {
     
     const file = event.target.files?.[0];
     if (file) {
-      const fileType = file.name.toLowerCase().split('.').pop();
-      const reader = new FileReader();
+      setIsProcessing(true);
       
-      if (fileType === 'txt' || fileType === 'rtf') {
-        reader.onload = async (e) => {
-          const text = e.target?.result as string;
-          await handleCreateDocument(file.name, text);
-        };
-        reader.readAsText(file);
-      } else if (fileType === 'pdf' || fileType === 'docx' || fileType === 'doc') {
-        const placeholderText = `Document uploaded: ${file.name}\n\nFile type: ${fileType.toUpperCase()}\n\nThis document has been uploaded successfully. In a full implementation, the content would be extracted using specialized libraries for ${fileType.toUpperCase()} files.\n\nPlease note: Full text extraction for ${fileType.toUpperCase()} files requires backend processing services.`;
-        await handleCreateDocument(file.name, placeholderText);
-      } else {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
         toast({
-          title: "Unsupported File Type",
-          description: `The file type '.${fileType}' is not supported. Please upload a PDF, DOCX, TXT, DOC, or RTF file.`,
-          variant: "destructive",
-          duration: 5000,
+          title: "Processing Document",
+          description: "Extracting text from your document...",
         });
+
+        const response = await fetch('/api/extract-text', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to extract text');
+        }
+
+        toast({
+          title: "Text Extracted Successfully",
+          description: `Extracted ${data.textLength} characters from ${file.name}`,
+        });
+
+        await handleCreateDocument(file.name, data.text);
+      } catch (error) {
+        console.error("Text extraction error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to extract text";
+        toast({
+          title: "Text Extraction Failed",
+          description: errorMessage,
+          variant: "destructive",
+          duration: 7000,
+        });
+        setIsProcessing(false);
       }
     }
     // Reset input to allow re-uploading the same file
-    event.target.value = '';
+    if (event.target) {
+      event.target.value = '';
+    }
   };
 
   return (
@@ -275,14 +296,14 @@ export default function HomePage() {
                   </CardHeader>
                   <CardContent>
                     <p className="mb-6 text-muted-foreground">
-                      Upload a file from your computer. Supported formats: PDF, DOCX, TXT, DOC, RTF
+                      Upload a file from your computer. Supported formats: PDF, DOCX, TXT, DOC, RTF, and Images (JPG, PNG, etc.)
                     </p>
                     <input
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
                       className="hidden"
-                      accept=".pdf,.docx,.txt,.doc,.rtf"
+                      accept=".pdf,.docx,.txt,.doc,.rtf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp"
                       disabled={isProcessing}
                     />
                     <Button 

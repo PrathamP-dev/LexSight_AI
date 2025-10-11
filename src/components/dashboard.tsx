@@ -353,25 +353,39 @@ function DashboardContent() {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target?.result as string;
-        try {
-          const newDocId = await addDocument({ name: file.name, content: text, type: 'contract' });
-          router.push(`/dashboard?docId=${newDocId}`);
-          await loadDocuments();
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        toast({
+          title: "Processing Document",
+          description: "Extracting text from your document...",
+        });
 
-          toast({
-              title: "Document Uploaded",
-              description: `"${file.name}" has been successfully added.`,
-          });
-        } catch (error) {
-          console.error("Failed to upload document:", error);
-          const errorMessage = error instanceof Error ? error.message : "An unknown error has occurred.";
-          toast({ title: "Upload Failed", description: errorMessage, variant: "destructive"});
+        const response = await fetch('/api/extract-text', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to extract text');
         }
-      };
-      reader.readAsText(file);
+
+        const newDocId = await addDocument({ name: file.name, content: data.text, type: 'contract' });
+        router.push(`/dashboard?docId=${newDocId}`);
+        await loadDocuments();
+
+        toast({
+          title: "Document Uploaded",
+          description: `"${file.name}" has been successfully added. Extracted ${data.textLength} characters.`,
+        });
+      } catch (error) {
+        console.error("Failed to upload document:", error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error has occurred.";
+        toast({ title: "Upload Failed", description: errorMessage, variant: "destructive"});
+      }
     }
     if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -493,7 +507,7 @@ function DashboardContent() {
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
-                  accept=".pdf,.docx,.txt"
+                  accept=".pdf,.docx,.txt,.doc,.rtf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp"
               />
               <div className="flex flex-col gap-2 w-full">
                 <Button variant="default" onClick={handleFileUploadClick}>
