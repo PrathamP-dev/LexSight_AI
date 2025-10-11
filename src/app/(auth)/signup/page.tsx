@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LegalMindLogo } from '@/components/icons';
+import { LexSightLogo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
@@ -67,7 +67,7 @@ export default function SignUpPage() {
 
       toast({
         title: 'Account Created',
-        description: 'Welcome to LegalMind!',
+        description: 'Welcome to LexSight!',
       });
 
       router.push('/home');
@@ -91,8 +91,8 @@ export default function SignUpPage() {
         <Card className="mx-auto w-full max-w-sm shadow-xl border-2 border-primary/10 bg-card/80 backdrop-blur-sm">
           <CardHeader className="text-center">
             <Link href="/" className="flex justify-center items-center gap-3 mb-2">
-              <LegalMindLogo className="h-9 w-9 text-primary" />
-              <CardTitle className="font-headline text-4xl">LegalMind</CardTitle>
+              <LexSightLogo className="h-9 w-9 text-primary" />
+              <CardTitle className="font-headline text-4xl">LexSight</CardTitle>
             </Link>
             <CardDescription>Create your account</CardDescription>
           </CardHeader>

@@ -207,7 +207,7 @@ const Sidebar = React.forwardRef<
             side={side}
           >
             <SheetHeader className="p-2">
-                <SheetTitle className="sr-only">LegalMind Menu</SheetTitle>
+                <SheetTitle className="sr-only">LexSight Menu</SheetTitle>
             </SheetHeader>
             {children}
           </SheetContent>

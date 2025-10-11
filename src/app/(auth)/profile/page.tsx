@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { LegalMindLogo } from "@/components/icons";
+import { LexSightLogo } from "@/components/icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { ArrowLeft, Camera, User, Lock, Bell } from "lucide-react";
@@ -109,8 +109,8 @@ export default function ProfilePage() {
                 <Card className="mx-auto w-full max-w-4xl shadow-xl border-primary/20 bg-card/80 backdrop-blur-sm mt-16">
                     <CardHeader className="text-center pb-4">
                         <div className="flex justify-center items-center gap-3 mb-2">
-                            <LegalMindLogo className="h-9 w-9 text-primary" />
-                            <CardTitle className="font-headline text-4xl">LegalMind</CardTitle>
+                            <LexSightLogo className="h-9 w-9 text-primary" />
+                            <CardTitle className="font-headline text-4xl">LexSight</CardTitle>
                         </div>
                         <CardDescription className="text-base">Manage your account settings and preferences</CardDescription>
                     </CardHeader>

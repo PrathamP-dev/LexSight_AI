@@ -8,7 +8,7 @@ import { SparkleProvider } from '@/components/sparkle-provider';
 import { PageTransition } from '@/components/page-transition';
 
 export const metadata: Metadata = {
-  title: 'LegalMind',
+  title: 'LexSight',
   description: 'Making Legal Documents Simple and Accessible for Everyone',
 };
 

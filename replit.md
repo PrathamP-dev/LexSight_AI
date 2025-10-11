@@ -1,7 +1,7 @@
-# LegalMind - AI-Powered Legal Document Analysis
+# LexSight - AI-Powered Legal Document Analysis
 
 ## Overview
-LegalMind is a Next.js application that makes legal documents simple and accessible for everyone. It helps simplify contracts, agreements, and compliance with AI technology for both legal and non-legal users.
+LexSight is a Next.js application that makes legal documents simple and accessible for everyone. It helps simplify contracts, agreements, and compliance with AI technology for both legal and non-legal users.
 
 ## Current State
 - Successfully imported from GitHub and configured for Replit environment

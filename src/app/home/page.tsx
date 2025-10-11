@@ -17,7 +17,7 @@ import { UploadCloud, FileText, ArrowRight, User, Settings, LogOut, FileStack, M
 import { LegalLoader } from '@/components/ui/legal-loader';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { LegalMindLogo } from '@/components/icons';
+import { LexSightLogo } from '@/components/icons';
 import { useRouter } from 'next/navigation';
 import { useRef, useState, useEffect } from 'react';
 import { addDocument, getDocuments } from '@/services/documents';
@@ -132,8 +132,8 @@ export default function HomePage() {
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto flex h-16 items-center justify-between px-4">
             <Link href="/" className="flex items-center gap-2 transition-all hover:opacity-80">
-              <LegalMindLogo className="size-8 text-primary" />
-              <h1 className="font-headline text-2xl font-bold">LegalMind</h1>
+              <LexSightLogo className="size-8 text-primary" />
+              <h1 className="font-headline text-2xl font-bold">LexSight</h1>
             </Link>
             
             {/* Theme Toggle and Account Dropdown */}

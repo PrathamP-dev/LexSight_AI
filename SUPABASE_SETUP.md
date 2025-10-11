@@ -1,6 +1,6 @@
 # Supabase Database Setup Instructions
 
-Your LegalMind application is now configured to use Supabase for persistent data storage. To complete the setup, you need to create the database tables in your Supabase project.
+Your LexSight application is now configured to use Supabase for persistent data storage. To complete the setup, you need to create the database tables in your Supabase project.
 
 ## Database Setup Steps
 

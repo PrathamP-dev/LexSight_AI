@@ -45,7 +45,7 @@ import { Separator } from '@/components/ui/separator';
 import type { Document } from '@/services/documents';
 import { getDocuments, deleteDocument, addDocument } from '@/services/documents';
 import { handleSummarizeClause, handleAnalyzeRisk } from '@/lib/actions';
-import { LegalMindLogo } from './icons';
+import { LexSightLogo } from './icons';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 import {
@@ -388,7 +388,7 @@ function DashboardContent() {
         return;
     }
 
-    let reportContent = `LegalMind Analysis Report\n`;
+    let reportContent = `LexSight Analysis Report\n`;
     reportContent += `Document: ${selectedDoc?.name}\n`;
     reportContent += `Generated On: ${new Date().toLocaleString()}\n`;
     reportContent += "========================================\n\n";
@@ -408,7 +408,7 @@ function DashboardContent() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `LegalMind_Report_${selectedDoc?.name.replace(/\s/g,"_")}.txt`;
+    link.download = `LexSight_Report_${selectedDoc?.name.replace(/\s/g,"_")}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -438,9 +438,9 @@ function DashboardContent() {
           <Sidebar>
             <SidebarHeader>
               <Link href="/" className="flex items-center gap-2">
-                <LegalMindLogo className="size-7 text-primary" />
+                <LexSightLogo className="size-7 text-primary" />
                 <h2 className="font-headline text-2xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">
-                  LegalMind
+                  LexSight
                 </h2>
               </Link>
             </SidebarHeader>
@@ -683,8 +683,8 @@ function DashboardContent() {
                 ) : (
                   <>
                     <div className="flex items-center gap-4">
-                      <LegalMindLogo className="h-16 w-16 text-primary" />
-                      <h1 className="font-headline text-5xl font-bold">Welcome to LegalMind</h1>
+                      <LexSightLogo className="h-16 w-16 text-primary" />
+                      <h1 className="font-headline text-5xl font-bold">Welcome to LexSight</h1>
                     </div>
                     <p className="max-w-md text-lg text-muted-foreground">
                       Your AI-powered document assistant. Upload a new document to get started.
