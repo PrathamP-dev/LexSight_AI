@@ -41,13 +41,16 @@
     "memoizee": "^0.4.17",
     "next": "15.3.3",
     "next-themes": "^0.3.0",
+    "office-text-extractor": "^3.0.3",
     "ogl": "^1.0.2",
     "openid-client": "^6.8.1",
+    "pdf-parse": "^2.2.8",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
+    "tesseract.js": "^6.0.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
