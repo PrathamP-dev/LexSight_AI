@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { LexSightLogo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -131,5 +131,31 @@ export default function LoginPage() {
         </Card>
       </div>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <div className="dark-veil"></div>
+        <div className="relative flex min-h-screen w-full items-center justify-center p-4">
+          <Card className="mx-auto w-full max-w-sm shadow-xl border-2 border-primary/10 bg-card/80 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <Link href="/" className="flex justify-center items-center gap-3 mb-2">
+                <LexSightLogo className="h-9 w-9 text-primary" />
+                <CardTitle className="font-headline text-4xl">LexSight</CardTitle>
+              </Link>
+              <CardDescription>Sign in to your account</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
