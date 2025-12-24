@@ -46,5 +46,5 @@ build = ["npm", "run", "build"]
 [userenv]
 
 [userenv.shared]
-NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-key"
+NEXT_PUBLIC_SUPABASE_URL = "https://wwmizwjumyfxmrbqcoms.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3bWl6d2p1bXlmeG1yYnFjb21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4OTIyNTEsImV4cCI6MjA3NDQ2ODI1MX0.vwkhWV-S4j6fcoKJexaCmWoKW1ZSiXj2yqLSGGXKuGc"
