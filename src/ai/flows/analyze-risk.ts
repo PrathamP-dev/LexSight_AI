@@ -31,7 +31,7 @@ export async function analyzeContractRisk(input: AnalyzeContractRiskInput): Prom
   if (!isAIEnabled || !ai || !analyzeContractRiskFlow) {
     // Return a placeholder response when AI is not available
     return {
-      riskSummary: "AI risk analysis is currently unavailable. Please configure GOOGLE_API_KEY to enable AI features. For now, please review the contract manually with a legal professional."
+      riskSummary: "AI risk analysis is currently unavailable. Please configure GEMINI_API_KEY to enable AI features. For now, please review the contract manually with a legal professional."
     };
   }
   return analyzeContractRiskFlow(input);
