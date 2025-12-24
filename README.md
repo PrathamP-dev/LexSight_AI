@@ -89,6 +89,7 @@ It bridges the gap between **complex legal jargon** and **everyday users**, help
 ### AI & Document Processing
 - **Google Gemini AI**
 - **Google Genkit**
+- **Groq API (high-performance LLM inference)**
 - **Tesseract.js** (OCR)
 - **pdf-parse**
 - **office-text-extractor**
