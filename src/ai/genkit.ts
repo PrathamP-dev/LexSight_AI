@@ -15,7 +15,7 @@ export async function callGroqAPI(prompt: string, systemPrompt: string): Promise
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.1-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt }
