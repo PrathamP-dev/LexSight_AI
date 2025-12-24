@@ -33,10 +33,16 @@ It bridges the gap between **complex legal jargon** and **everyday users**, help
 **LexSight AI solves this** by providing AI-powered document analysis, summaries, and risk detection in one unified platform.
 
 ---
+## 📸 UI Screenshots
 
-![Landing_Page](./public/Screenshots_UI/Landing_Page.png)
-![Login](./public/Screenshots_UI/Login.png)
-![Dashboard](./public/Screenshots_UI/Dashboard.png)
+<p align="center">
+  <img src="./public/Screenshots_UI/Landing_Page.png" width="90%" alt="Landing Page"/>
+</p>
+
+<p align="center">
+  <img src="./public/Screenshots_UI/Login.png" width="45%" alt="Login Page"/>
+  <img src="./public/Screenshots_UI/Dashboard.png" width="45%" alt="Dashboard"/>
+</p>
 
 ---
 
