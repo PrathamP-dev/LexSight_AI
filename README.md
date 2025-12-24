@@ -34,6 +34,12 @@ It bridges the gap between **complex legal jargon** and **everyday users**, help
 
 ---
 
+![Landing_Page](./public/Screenshots_UI/Landing_Page.png)
+![Login](./public/Screenshots_UI/Login.png)
+![Dashboard](./public/Screenshots_UI/Dashboard.png)
+
+---
+
 ## ✨ Key Features
 
 ### 🔍 Core Functionality
