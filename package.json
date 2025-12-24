@@ -37,6 +37,7 @@
     "dotenv": "^16.5.0",
     "framer-motion": "^11.5.7",
     "genkit": "^1.14.1",
+    "groq-sdk": "^0.37.0",
     "lucide-react": "^0.475.0",
     "memoizee": "^0.4.17",
     "next": "15.3.3",

@@ -1,15 +1,38 @@
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+// Groq API configuration
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+export const isAIEnabled = !!GROQ_API_KEY;
 
-// Check if Gemini API key is available (try both old and new names)
-const isAIEnabled = !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
-const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+// Groq API client helper
+export async function callGroqAPI(prompt: string, systemPrompt: string): Promise<string> {
+  if (!GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY is not configured');
+  }
 
-// Only initialize AI if API key is present
-export const ai = isAIEnabled ? genkit({
-  plugins: [googleAI({apiVersion: 'v1beta', apiKey: apiKey})],
-  model: 'googleai/gemini-2.0-flash',
-}) : null;
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'mixtral-8x7b-32768',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 4096,
+    }),
+  });
 
-// Export flag to check AI availability
-export { isAIEnabled };
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Groq API Error: ${error.error?.message || 'Unknown error'}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0]?.message?.content || '';
+}
+
+// Placeholder for backward compatibility
+export const ai = null;

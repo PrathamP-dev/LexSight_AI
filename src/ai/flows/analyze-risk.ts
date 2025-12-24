@@ -8,65 +8,44 @@
  * - AnalyzeContractRiskOutput - The return type for the analyzeContractRisk function.
  */
 
-import {ai, isAIEnabled} from '@/ai/genkit';
-import {z} from 'genkit';
+import { isAIEnabled, callGroqAPI } from '@/ai/genkit';
 
-const AnalyzeContractRiskInputSchema = z.object({
-  contractText: z
-    .string()
-    .describe('The text of the contract to analyze for potential risks.'),
-});
-export type AnalyzeContractRiskInput = z.infer<typeof AnalyzeContractRiskInputSchema>;
-
-const AnalyzeContractRiskOutputSchema = z.object({
-  riskSummary: z
-    .string()
-    .describe(
-      'A summary of the potential risks identified in the contract, along with insights and warnings.'
-    ),
-});
-export type AnalyzeContractRiskOutput = z.infer<typeof AnalyzeContractRiskOutputSchema>;
-
-export async function analyzeContractRisk(input: AnalyzeContractRiskInput): Promise<AnalyzeContractRiskOutput> {
-  if (!isAIEnabled || !ai || !analyzeContractRiskFlow) {
-    // Return a placeholder response when AI is not available
-    return {
-      riskSummary: "AI risk analysis is currently unavailable. Please configure GEMINI_API_KEY to enable AI features. For now, please review the contract manually with a legal professional."
-    };
-  }
-  return analyzeContractRiskFlow(input);
+export interface AnalyzeContractRiskInput {
+  contractText: string;
 }
 
-// Only define AI flows if AI is enabled
-const prompt = isAIEnabled && ai ? ai.definePrompt({
-  name: 'analyzeContractRiskPrompt',
-  input: {schema: AnalyzeContractRiskInputSchema},
-  output: {schema: AnalyzeContractRiskOutputSchema},
-  prompt: `You are a legal expert specializing in contract risk analysis. You are thorough, precise, and your goal is to protect your client's interests.
+export interface AnalyzeContractRiskOutput {
+  riskSummary: string;
+}
 
-You will analyze the following contract text for potential risks. Your analysis should be comprehensive and presented in a clear, structured format.
+export async function analyzeContractRisk(input: AnalyzeContractRiskInput): Promise<AnalyzeContractRiskOutput> {
+  if (!isAIEnabled) {
+    return {
+      riskSummary: "AI risk analysis is currently unavailable. Please configure GROQ_API_KEY to enable AI features. For now, please review the contract manually with a legal professional."
+    };
+  }
+
+  try {
+    const systemPrompt = `You are a legal expert specializing in contract risk analysis. You are thorough, precise, and your goal is to protect your client's interests.`;
+
+    const userPrompt = `You will analyze the following contract text for potential risks. Your analysis should be comprehensive and presented in a clear, structured format.
 
 For each identified risk, provide:
-1.  **Risk Category:** (e.g., Liability, Confidentiality, Termination, IP Rights, etc.)
-2.  **Clause Reference:** The specific clause number or section.
-3.  **Risk Description:** A clear explanation of the potential risk.
-4.  **Severity Level:** (Low, Medium, High)
-5.  **Suggested Mitigation:** Actionable advice on how to mitigate the risk (e.g., suggest alternative wording, recommend negotiation points).
+1. **Risk Category:** (e.g., Liability, Confidentiality, Termination, IP Rights, etc.)
+2. **Clause Reference:** The specific clause number or section.
+3. **Risk Description:** A clear explanation of the potential risk.
+4. **Severity Level:** (Low, Medium, High)
+5. **Suggested Mitigation:** Actionable advice on how to mitigate the risk (e.g., suggest alternative wording, recommend negotiation points).
 
 Present your findings in a well-formatted markdown response. Start with an overall summary of the contract's risk profile.
 
 Contract Text:
-{{{contractText}}}`,
-}) : null;
+${input.contractText}`;
 
-const analyzeContractRiskFlow = isAIEnabled && ai ? ai.defineFlow(
-  {
-    name: 'analyzeContractRiskFlow',
-    inputSchema: AnalyzeContractRiskInputSchema,
-    outputSchema: AnalyzeContractRiskOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt!(input);
-    return output!;
+    const riskSummary = await callGroqAPI(userPrompt, systemPrompt);
+    return { riskSummary };
+  } catch (error) {
+    console.error('Error in analyzeContractRisk:', error);
+    throw error;
   }
-) : null;
+}
