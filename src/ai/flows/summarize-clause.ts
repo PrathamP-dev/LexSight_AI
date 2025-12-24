@@ -25,7 +25,7 @@ export async function summarizeClause(input: SummarizeClauseInput): Promise<Summ
   if (!isAIEnabled || !ai || !summarizeClauseFlow) {
     // Return a placeholder response when AI is not available
     return {
-      summary: "AI summarization is currently unavailable. Please configure GEMINI_API_KEY to enable AI features. For now, please review the clause manually."
+      summary: "AI summarization is currently unavailable. Please configure GOOGLE_API_KEY to enable AI features. For now, please review the clause manually."
     };
   }
   return summarizeClauseFlow(input);
